@@ -1,6 +1,6 @@
 'use strict';
 
-function curry(fn) {
+function partialize(fn) {
 
     return function partial() {
         let partialArgs = [].slice.call(arguments);
@@ -21,13 +21,13 @@ function sum(a, b, c, d) {
     return a + b + c + d;
 }
 
-let curriedSum = curry(sum);
+let partialSum = partialize(sum);
 
 let test = [
-    curriedSum(1, 2, 3, 4),
-    curriedSum(1, 2)(3, 4),
-    curriedSum(1)(2, 3)(4),
-    curriedSum(1, 2)(3)(4)
+    partialSum(1, 2, 3, 4),
+    partialSum(1, 2)(3, 4),
+    partialSum(1)(2, 3)(4),
+    partialSum(1, 2)(3)(4)
 ];
 
 console.log(test);

@@ -1,16 +1,16 @@
 'use strict';
 
-function compose() {
-    let functions = [].slice.call(arguments);
+function composition() {
+    const functions = [].slice.call(arguments);
 
     return function (arg) {
         return functions.reduce((memo, curr) => curr(memo), arg);
-    }
+    };
 }
 
-let add3 = x => x + 3;
-let stringify = x => x.toString() + '5';
-let parse = x => +x;
-let increment = x => ++x;
+const add3 = x => x + 3,
+    stringify = x => x.toString() + '5',
+    parse = x => +x,
+    increment = x => ++x;
 
-console.log(compose(add3, stringify, parse, increment)(3));
+console.log(composition(add3, stringify, parse, increment)(3));
