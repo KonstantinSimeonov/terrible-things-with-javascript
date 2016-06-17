@@ -10,8 +10,6 @@ function List() {
     return args.reduceRight((memo, curr) => pair(curr, memo), null);
 }
 
-const list = List(1, 5, 10, true, 'gojo', 'cyki kaza che tova e tipichen blek metAl, zashtoto cyki e...');
-
 function forEach(list, fn) {
     if(!list) {
         return;
@@ -91,16 +89,45 @@ function zipWith(leftList, rightList, fn) {
 // forEach(map(list, x => x + 1), console.log);
 
 
+Array.prototype.toList = function () {
+    return List.apply(null, this);
+};
 
-const data = List.apply(null, [1, 2, 3, 10, 20 ,50, 33]);
+Function.prototype.map = function (fn) {
+    return map.apply(null, [this, fn]);
+};
+
+Function.prototype.forEach = function (fn) {
+    return forEach.apply(null, [this, fn]);
+};
+
+Function.prototype.filter = function (fn) {
+    return filter.apply(null, [this, fn]);
+};
+
+Function.prototype.foldl = function (fn, initial) {
+    return foldl.apply(null, [this, fn, initial]);
+};
+
+Function.prototype.foldr = function (fn, initial) {
+    return foldr.apply(null, [this, fn, initial]);
+};
+
+Function.prototype.zip = function (other) {
+    return zip.apply(null, [this, other]);
+};
+
+Function.prototype.zipWith = function (other, fn) {
+    return zip.apply(null, [this, fn]);
+};
+
+
+const data = [1, 2, 3, 10, 20 ,50, 33].toList();
 
 const customConcat = (m, c) => m + ', ' + c;
 
-console.log( foldl(filter(data, x => x % 2), customConcat) );
-console.log( foldr(data, customConcat) );
+console.log( data.filter(x => x % 2).map(x => x + 1).foldr(customConcat) );
+console.log( data.zip(['a', 'b', 'c'].toList()).map(x => x((h, t) => `(${h}, ${t})`)).foldl(customConcat) );
 
-const a = List.apply(null, [1, 2, 3, 4, 5]),
-      b = List.apply(null, ['a', 'b', 'c']),
-      zippedAB = zip(a, b);
+
       
-console.log(foldl(map(zippedAB, p => p((first, second) => `(${first}, ${second})`)), (m, c) => m + ' ' + c));
