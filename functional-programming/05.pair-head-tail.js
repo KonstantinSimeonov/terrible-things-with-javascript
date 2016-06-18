@@ -138,11 +138,11 @@ Function.prototype.show = function () {
     return '[' + this.foldl((m, c) => m + ', ' + c) + ']';
 }
 
-Function.prototype.first = function () {
+Function.prototype.head = function () {
     return first.call(null, this);
 }
 
-Function.prototype.second = function () {
+Function.prototype.tail = function () {
     return second.call(null, this);
 }
 
@@ -151,7 +151,7 @@ const data = [1, 2, 3, 10, 20 ,50, 33].toList();
 const customConcat = (m, c) => m + ', ' + c;
 
 console.log( data.filter(x => x % 2).map(x => x + 1).foldr(customConcat) );
-console.log( data.zip(['a', 'b', 'c'].toList()).map(x => x((h, t) => `(${h}, ${t})`)).foldl(customConcat) );
+console.log( data.zip(['a', 'b', 'c'].toList()).map(x => x((h, t) => `(${h}, ${t})`)).show() );
 
 const listAsString = [1, 2, 3].toList().reverse().show();
 
