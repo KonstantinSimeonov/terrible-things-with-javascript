@@ -1,8 +1,8 @@
 'use strict';
 
 const pair = (h, t) => fn => fn(h, t),
-      first = pair => pair((h, t) => h),
-      second = pair => pair((h, t) => t);
+      first = p => p((h, t) => h),
+      second = p => p((h, t) => t);
 
 function List() {
     let args = [].slice.call(arguments);
@@ -47,6 +47,11 @@ function foldl(list, fn, initial) {
 }
 
 function foldr(list, fn, initial) {
+
+    if(initial === undefined) {
+        return foldr(second(list), fn, first(list));
+    }
+
     if(!list) {
         return initial;
     }
@@ -83,7 +88,11 @@ function zip(leftList, rightList) {
 }
 
 function zipWith(leftList, rightList, fn) {
-    return map(zip(leftList, rightList), fn);
+    return map(zip(leftList, rightList), p => p(fn));
+}
+
+function reverse(list) {
+    return foldl(list, (m, c) => pair(c, m), null);
 }
 
 // forEach(map(list, x => x + 1), console.log);
@@ -118,9 +127,24 @@ Function.prototype.zip = function (other) {
 };
 
 Function.prototype.zipWith = function (other, fn) {
-    return zip.apply(null, [this, fn]);
+    return zipWith.apply(null, [this, fn]);
 };
 
+Function.prototype.reverse = function () {
+    return reverse.apply(null, [this]);
+};
+
+Function.prototype.show = function () {
+    return '[' + this.foldl((m, c) => m + ', ' + c) + ']';
+}
+
+Function.prototype.first = function () {
+    return first.call(null, this);
+}
+
+Function.prototype.second = function () {
+    return second.call(null, this);
+}
 
 const data = [1, 2, 3, 10, 20 ,50, 33].toList();
 
@@ -129,5 +153,8 @@ const customConcat = (m, c) => m + ', ' + c;
 console.log( data.filter(x => x % 2).map(x => x + 1).foldr(customConcat) );
 console.log( data.zip(['a', 'b', 'c'].toList()).map(x => x((h, t) => `(${h}, ${t})`)).foldl(customConcat) );
 
+const listAsString = [1, 2, 3].toList().reverse().show();
+
+console.log(listAsString);
 
       
