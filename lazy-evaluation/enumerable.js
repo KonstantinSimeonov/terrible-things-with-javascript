@@ -7,6 +7,7 @@ const Enumerable = (function () {
         return this;
     }
 
+    // TODO: make take and skip lazy
     function take(count) {
         this.count = count;
         return this;
@@ -24,6 +25,7 @@ const Enumerable = (function () {
         return this;
     }
 
+    // TODO: refactor and abstract the iteration with callback to simplify implementation of foldl
     function toArray() {
         const self = this;
 
@@ -56,6 +58,7 @@ const Enumerable = (function () {
         return self.result;
     }
 
+    // TODO: make it.. okay?
     function Source() {
         const src = arguments[0];
 
@@ -127,7 +130,7 @@ let nums = Enumerable([1, 2, 3, 4, 5, 6, 7])
                                 .map(x => x * x)
                                 .take(3)
                                 .skip(1);
-
+// TODO: encapsulation
 function* range(start, count) {
     for (let i = start; i < start + count; i += 1) {
         yield i;
