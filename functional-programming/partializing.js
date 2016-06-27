@@ -2,16 +2,13 @@
 
 function partialize(fn) {
 
-    return function partial() {
-        let partialArgs = [].slice.call(arguments);
+    return function partial(...partialArgs) {
 
         if(partialArgs.length >= fn.length) {
             return fn.apply(null, partialArgs);
         } 
         
-        return function () {
-            let innerArgs = [].slice.call(arguments);
-
+        return function (...innerArgs) {
             return partial.apply(null, partialArgs.concat(innerArgs));
         }
     }
