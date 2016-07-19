@@ -29,6 +29,7 @@ $.fn.colorpicker = function () {
         canvas = palette.get(0);
 
     img.src = CONST.paletteImgSrc;
+    img.crossOrigin = 'Anonymous';
 
     showBtn.on('click', function () {
         colorpicker.toggleClass('picker-hidden');
