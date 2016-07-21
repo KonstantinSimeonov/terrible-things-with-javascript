@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tabs demo</title>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <div id="tabs" style="width: 40%; height: 50%"></div>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+    <script src="./js/tabs.js"></script>
+    <script>
+        const tabs = [
+            {
+                title: 'Gosho',
+                content: 'Gosho e supergeroi ot dalechnoto budeshte, koito e doshul da spasi minaloto. Rodom ot planeta Kibertron, Gosho pritejava vrodenata inteligentnost i nepokolebimost na istinski kibertronchanin.'
+            },
+            {
+                title: 'Kircho Dragoev',
+                content: 'Genialen superzlodei, koito chrez umeli forumni manipulacii se stremi kum svetovno gospodstvo. Zlite mu tehniki na manipulaciq vkluchvat multiple accounting, like/dislike i forum crawling.'
+            },
+            {
+                title: 'Kuci',
+                content: 'Zagaduchna lichnost s dualistichna priroda - java programist i izkluchitelen showmen v edno tqlo. Malko izvesten fakt e, che toi e programiral koleloto na kusmeta taka, che vinagi da dava bankrut - estestveno izpolvaiki slojen algoritum na java.'
+            },
+            {
+                title: 'Crisco',
+                content: 'Populqren komik, izvesten e sushto pod psevdonima "djojeto". Neveroqtnite mu showprogrami vkluchvat tanci, muzika najivo i ponqkoga Qn-Bibiqn.'
+            }
+        ];
+
+        $('#tabs').tabs(tabs);
+    </script>
+</body>
+</html>
