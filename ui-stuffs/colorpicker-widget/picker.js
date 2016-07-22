@@ -1,5 +1,13 @@
-$.fn.colorpicker = function () {
+$.fn.colorpicker = function (width) {
     'use strict';
+
+    width = width || 300;
+
+    if(width < 260) {
+        width = 260;
+    } else if(width > 500) {
+        width = 500;
+    }
 
     const CONST = {
         pixelDataCount: 4,
@@ -17,8 +25,9 @@ $.fn.colorpicker = function () {
     }
 
     const $this = $(this),
-        showBtn = $('<span />').addClass('show-btn open').appendTo($this),
-        colorpicker = $('<div />', { 'id': 'color-picker-div', 'class': 'picker-hidden' }).appendTo($this),
+        colorPickerWrapper = $('<div />').addClass('color-picker').css('width', width + 'px'),
+        showBtn = $('<span />').addClass('show-btn open').appendTo(colorPickerWrapper),
+        colorpicker = $('<div />', { 'class': 'picker-hidden color-picker-div' }).appendTo(colorPickerWrapper),
         palette = $('<canvas />').appendTo(colorpicker),
         colors = $('<div />').addClass('colors').appendTo(colorpicker),
         hex = $('<input />', { 'type': 'text', 'placeholder': 'HEX' }).appendTo(colors),
@@ -51,7 +60,7 @@ $.fn.colorpicker = function () {
         colorDiv.css('background-color', CONST.initialColor);
     });
 
-    palette.on('click', function (ev) {
+    colorPickerWrapper.on('click', 'canvas', function (ev) {
         
         const x = (ev.clientX - palette.offset().left | 0) * CONST.pixelDataCount,
             y = (ev.clientY - palette.offset().top | 0) * CONST.pixelDataCount * this.width,
@@ -72,6 +81,8 @@ $.fn.colorpicker = function () {
 
         }
     });
+
+    colorPickerWrapper.appendTo($this);
 
     return $(this);
 }

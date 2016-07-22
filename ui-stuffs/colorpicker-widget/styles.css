@@ -1,50 +1,54 @@
-#color-picker {
-    position: relative;
+.color-picker {
+    position: relative
 }
 
-#color-picker-div {
+.color-picker-div {
+    position: absolute;
+    left: 0;
     border-radius: 15px;
     background-color: #636262;
-    padding: 1em;
-    width: 224px;
+    padding: 2.5em;
+    width: 100%;
     display: inline-block;
     position: absolute;
     box-shadow: 10px 10px 10px silver;
+    z-index: 0
 }
 
-#color-picker-div canvas {
+.color-picker-div canvas {
     display: block;
+    margin-left: 1em;
+    border-radius: 50px
 }
 
-#color-picker-div canvas:hover {
+.color-picker-div canvas:hover {
     cursor: url('./imgs/cursor.png') -1 25, auto;
 }
 
-#color-picker-div .colors {
+.color-picker-div .colors {
     margin-top: 5%;
     display: inline-block;
-    width: 40%;
+    width: 40%
 }
 
-#color-picker-div .colors input {
+.color-picker-div .colors input {
     margin-top: 5%;
-    width: 100%;
+    width: 100%
 }
 
-#color-picker-div .color-viz {
-    position: absolute;
-    bottom: 4.5%;
-    right: 5%;
-    height: 15%;
-    width: 30%;
-    z-index: 1;
+.color-picker-div .color-viz {
+    float: right;
+    margin-top: 1.25em;
+    height: 3.25em;
+    width: 40%;
+    z-index: 1
 }
 
-#color-picker-div.picker-hidden {
-    display: none;
+.color-picker-div.picker-hidden {
+    display: none
 }
 
-#color-picker .show-btn.close::after {
+.color-picker .show-btn.close::after {
     background-image: url('./imgs/close.png');
     background-size: 32px 32px;
     display: inline-block;
@@ -52,9 +56,13 @@
     height: 32px;
     content:"";
     cursor: pointer;
+    position: absolute;
+    margin-left: 2.5%;
+    margin-top: 2.5%;
+    z-index: 100
 }
 
-#color-picker .show-btn.open::after {
+.color-picker .show-btn.open::after {
     background-image: url('./imgs/icon.jpg');
     background-size: 32px 32px;
     display: inline-block;
@@ -64,15 +72,12 @@
     cursor: pointer;
     border: 2px solid #636262;
     border-radius: 5px;
-    box-shadow: 1px 1px 5px silver;
+    box-shadow: 1px 1px 5px silver
 }
 
-#color-picker .show-btn {
-    position: absolute;
-    margin-top: 0.5%;
-    margin-left: 0.5%;
+.color-picker .show-btn {
     border-radius: 5px;
     width: 32px;
     height: 32px;
-    z-index: 2;
+    z-index: 2
 }
