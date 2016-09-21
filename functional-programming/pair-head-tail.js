@@ -1,8 +1,8 @@
 'use strict';
 
 const pair = (h, t) => fn => fn(h, t),
-      first = p => p((h, t) => h),
-      second = p => p((h, t) => t);
+      first = p => p((h, _) => h),
+      second = p => p((_, t) => t);
 
 function List() {
     let args = [].slice.call(arguments);

@@ -1,7 +1,7 @@
 # NodeJS Database App
 
 ## Description
-This in an implementation of [this](https://github.com/TelerikAcademy/Databases/tree/f7c3fc9d6f07bb60859c556184bf23eea334738f/21.%20Databases%20Team%20Work%20Project/2015) assignment, only using NodeJS instead of .NET. Also:
+- This in an implementation of [this](https://github.com/TelerikAcademy/Databases/tree/f7c3fc9d6f07bb60859c556184bf23eea334738f/21.%20Databases%20Team%20Work%20Project/2015) assignment, only using NodeJS instead of .NET. Also:
     - MS SQL Server is left out in favor of MariaDB
     - MySQL will be left out in favor of CouchDB
 
