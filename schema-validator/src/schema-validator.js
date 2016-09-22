@@ -99,40 +99,44 @@ function validateEnum(constraints, value) {
     return errors
 }
 
-const validationFns = {
+const defaultValidationFunctions = {
     enum: validateEnum,
     string: validateString,
     number: validateNumber,
     boolean: validateBoolean,
-    complex: validate,
 }
 
-function validate(schema, object) {
+function createValidateFunction(validationFunctions) {
+    validationFunctions.complex = createValidateFunction
 
-    const errors = []
+    return function validate(schema, object) {
 
-    for (const propName in schema) {
+        const errors = []
 
-        if (propName === '__type') {
-            if (schema.__type !== 'complex') {
-                validateType(schema.__type, typeof object, errors)
+        for (const propName in schema) {
+
+            if (propName === '__type') {
+                if (schema.__type !== 'complex') {
+                    validateType(schema.__type, typeof object, errors)
+                }
+                continue
             }
-            continue
+
+            const subSchema = schema[propName],
+                propertyToValidate = object[propName],
+                validateProperty = validationFunctions[subSchema.__type]
+
+            if (validateProperty) {
+                const propagatedErrors = validateProperty(subSchema, propertyToValidate)
+                errors.push(...propagatedErrors)
+            }
         }
 
-        const subSchema = schema[propName],
-            propertyToValidate = object[propName],
-            validateProperty = validationFns[subSchema.__type]
-
-        if (validateProperty) {
-            const propagatedErrors = validateProperty(subSchema, propertyToValidate)
-            errors.push(...propagatedErrors)
-        }
+        return errors
     }
-
-    return errors
 }
 
 module.exports = {
-    default: validate
+    default: createValidateFunction(defaultValidationFunctions),
+    createValidateFunction
 };
