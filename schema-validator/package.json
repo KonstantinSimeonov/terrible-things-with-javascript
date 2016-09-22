@@ -1,0 +1,25 @@
+{
+  "name": "schema-validator",
+  "version": "0.1.0",
+  "description": "Provide declarative validation for js objects",
+  "main": "./src/schema-validator.js",
+  "directories": {
+    "test": "tests",
+    "lib": "./src"
+  },
+  "scripts": {
+    "test": "mocha -R spec ./tests"
+  },
+  "keywords": [
+    "validation",
+    "declarative",
+    "javascript",
+    "json"
+  ],
+  "author": "Konstantin Simeonov",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2"
+  }
+}
