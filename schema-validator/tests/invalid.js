@@ -53,7 +53,7 @@ describe('Should return errors', () => {
                 }
             }
 
-            const errors = validate(schema, { })
+            const errors = validate(schema, {})
 
             expect(errors.length).to.equal(2)
         })
@@ -82,7 +82,40 @@ describe('Should return errors', () => {
 
             expect(errors.length).to.equal(1)
         })
+    })
 
+    describe('should return error for boolean properties', () => {
+
+        it('should return error when value of other type is passed', () => {
+            const schema = {
+                age: {
+                    __type: 'number',
+                },
+                gender: {
+                    __type: 'boolean',
+                }
+            }
+
+            const errors = validate(schema, { age: 3, gender: '' })
+
+            expect(errors.length).to.equal(1)
+        })
+
+        it('should return error when the value is required but is not present on an object', () => {
+            const schema = {
+                age: {
+                    __type: 'number',
+                },
+                gender: {
+                    __type: 'boolean',
+                    required: true
+                }
+            }
+
+            const errors = validate(schema, { age: 3 })
+
+            expect(errors.length).to.equal(1)
+        })
     })
 
 })

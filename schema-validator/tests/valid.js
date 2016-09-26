@@ -40,7 +40,7 @@ describe('Should return no errors', () => {
             const schema = {
                 age: {
                     __type: 'number',
-                    allowNan: true
+                    allowNaN: true
                 }
             }
 
@@ -48,7 +48,59 @@ describe('Should return no errors', () => {
 
             expect(errors.length).to.equal(0)
         })
-        
+    })
+
+    describe('valid boolean properties', () => {
+
+        it('shouldn`t return errors when boolean property has boolean value "true"', () => {
+            const schema = {
+                age: {
+                    __type: 'number',
+                },
+                gender: {
+                    __type: 'boolean',
+                    required: true
+                }
+            }
+
+            const errors = validate(schema, { age: 3, gender: true })
+
+            expect(errors.length).to.equal(0)
+        })
+
+        it('shouldn`t return errors when boolean property has boolean value "false"', () => {
+            const schema = {
+                age: {
+                    __type: 'number',
+                },
+                gender: {
+                    __type: 'boolean',
+                    required: true
+                }
+            }
+
+            const errors = validate(schema, { age: 3, gender: false })
+
+            expect(errors.length).to.equal(0)
+        })
+
+        it('shouldn`t return errors when boolean property is not required', () => {
+
+            const schema = {
+                age: {
+                    __type: 'number',
+                },
+                gender: {
+                    __type: 'boolean',
+                    required: false
+                }
+            }
+
+            const errors = validate(schema, { age: 3 })
+
+            expect(errors.length).to.equal(0)
+        })
+
     })
 
 })
