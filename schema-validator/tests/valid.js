@@ -100,7 +100,69 @@ describe('Should return no errors', () => {
 
             expect(errors.length).to.equal(0)
         })
+    })
 
+    describe('valid string properties', () => {
+
+        it('shouldn`t return errors when string type is expected and required and a string value is provided', () => {
+            const schema = {
+                firstname: {
+                    __type: 'string',
+                    required: true
+                }
+            }
+
+            const errors = validate(schema, { firstname: 'ivan' })
+
+            expect(errors.length).to.equal(0)
+        })
+
+        it('shouldn`t return errors when string length is in allowed range', () => {
+            const schema = {
+                name: {
+                    __type: 'string',
+                    required: true,
+                    minlength: 2,
+                    maxlength: 20
+                }
+            }
+
+            let name = 'aa'
+
+            for(let i = name.length; i < 20; i += 1) {
+                const errors = validate(schema, { name })
+                expect(errors.length).to.equal(0)
+
+                name += 'a'
+            }
+        })
+
+        it('shouldn`t return errors when string matches the regexp pattern', () => {
+            const schema = {
+                name: {
+                    __type: 'string',
+                    required: true,
+                    pattern: /[a-z]+/i
+                }
+            }
+
+            const errors = validate(schema, { name: 'dfdgJAJSadsf' })
+
+            expect(errors.length).to.equal(0)
+        })
+
+        it('shouldn`t return errors when string fullfills the predicate', () => {
+            const schema = {
+                name: {
+                    __type: 'string',
+                    predicate: value => value.split('p').length > 5
+                }
+            }
+
+            const errors = validate(schema, { name: 'pizza people peter pancakes with cuprum popup pendulum' })
+
+            expect(errors.length).to.equal(0)
+        })
     })
 
 })
