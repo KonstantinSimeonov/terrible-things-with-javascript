@@ -1,112 +1,44 @@
 'use strict';
 
-const unzip = require('./unzip'),
-    path = require('path'),
-    mysql = require('mysql'),
-    xslx = require('../../node_modules/node-xlsx/lib/');
+const contests = require('./data/contests');
 
-const parsed = xslx.parse('./worksheet functions.xlsx');
-
-const mysqlConnection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'mariadbkon',
-    database: 'testdb'
-});
-
-mysqlConnection.connect();
-
-mysqlConnection.query(`CREATE TABLE if not exists categories (
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL
-);`, function (err, rows, fields) {
-        if (err) {
-            return console.log(err);
-        }
-
-        console.log('Create categories OK');
-    });
-
-mysqlConnection.query(`CREATE TABLE if not exists functions (
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    description VARCHAR(300) NOT NULL,
-    category_id INT NOT NULL,
-    CONSTRAINT \`fk_category\`
-            FOREIGN KEY (category_id) REFERENCES categories (id)
-            ON DELETE CASCADE
-            ON UPDATE RESTRICT 
-    );`, function (err, rows, fields) {
-        if (err) {
-            return console.log(err);
-        }
-
-        console.log('Create functions OK');
-    });
-
-const rows = parsed[0].data.slice(1),
-    categories = {};
-
-for (const row of rows) {
-    if (!categories[row[0]]) {
-        categories[row[0]] = [];
-    }
-
-    categories[row[0]].push({
-        name: row[1],
-        description: row[2]
-    });
+function mapParams(url) {
+    return url.split('?')
+        .pop()
+        .split('&')
+        .map(pair => pair.split('='))
+        .reduce(function (params, currentPair) {
+            params[currentPair[0]] = currentPair[1];
+            return params;
+        }, {});
 }
 
-const values = Object.keys(categories).map(cat => `('${cat}')`).join(', ');
+const http = require('http'),
+    server = http.createServer(function (req, res) {
 
-const insertCmd = `INSERT INTO categories (name) VALUES ${values};`;
+        res.json = function (object) {
+            res.setHeader('Content-Type', 'application/json');
+            res.write(JSON.stringify(object));
+            res.end();
+        }
 
-// mysqlConnection.query(insertCmd, function (err, rows, fields) {
-//     if(err) {
-//         return console.log(err);
-//     }
+        if (req.url.indexOf('/contests') === 0) {
+            const queryParams = mapParams(req.url);
 
-//     console.log(rows);
-// })
+            console.log(queryParams);
 
-// mysqlConnection.query('SELECT * FROM categories;', function (err, rows, fields) {
-//     if (err) {
-//         return console.log(err);
-//     }
+            contests.page({
+                pageSize: +queryParams.pagesize,
+                pageNumber: +queryParams.page,
+                sort: { creationDate: 1 },
+                project: { name: true, startDate: true, endDate: true }
+            }).then(res.json);
+        }
 
+    });
 
-//     const functionValues = [];
-
-//     for (const cat of rows) {
-//         const functionsOfCat = categories[cat.name].map(fn => `('${fn.name}', '${fn.description}', ${cat.id})`);
-
-//         functionValues.push(...functionsOfCat);
-//     }
-
-//     const insertFunctionsCommand = `INSERT INTO functions (name, description, category_id) VALUES ${functionValues.join(', ')};`;
-
-//     mysqlConnection.query(insertFunctionsCommand, function (err, rows, fields) {
-//         if (err) {
-//             return console.log(err);
-//         }
-
-//         console.log(rows);
-//         mysqlConnection.end();
-//     });
-// });
-
-const promise = new Promise(function (resolve, reject) {
-    mysqlConnection.query('SELECT category_id, COUNT(*) as count from functions GROUP BY category_id', (err, rows) => err ? reject(err) : resolve(rows));
-});
-
-promise.then(function (data) {
-    console.log(data);
-    mysqlConnection.end();
-});
-
+server.listen(1234, () => console.log('Server listening on port 1234'));
 
 
 // m, kjb kmb lk jg hf ikj;l.
 // pumata kazva che tova shte struva milioni. amin!
-// unzip(path.join(__dirname, './zips'));
