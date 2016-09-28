@@ -10,7 +10,8 @@
 
 ## TODO:
 - Decide what data to use and model
-    - Maybe Northwind db
+    - ~~Maybe Northwind db~~
+    - Use random generated data
 - Create a raw node http server to serve data requests
     - Should expose a RESTful api
         - for crud over the database models
