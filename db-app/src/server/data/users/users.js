@@ -10,8 +10,14 @@ module.exports = function (connectionPromise, collectionName, wrapInPromise) {
     const dataProviderFunctions = [
 
         function page(collection, options) {
+            const filter = options.filter || {};
+
+            if(!options.showDeleted) {
+                filter.deleted = undefined;
+            }
+
             return collection
-                .find(options.filter || {})
+                .find(filter)
                 .sort(options.sort || { _id: 1 })
                 .skip((options.pageSize || 10) * options.pageNumber)
                 .limit(options.pageSize)
@@ -26,9 +32,12 @@ module.exports = function (connectionPromise, collectionName, wrapInPromise) {
         function first(collection, options) {
             return collection.findOne(options);
         },
-
         function updateOne(collection, options) {
             return collection.findOneAndUpdate(options.filter, options.updates);
+        },
+
+        function remove(collection, options) {
+            return collection.updateMany(options, { $set: { deleted: true, deletedOn: new Date() } });
         }
 
     ];
