@@ -1,44 +1,24 @@
 'use strict';
 
-const contests = require('./data/contests');
+const restify = require('restify'),
+    contests = require('./data/contests');
 
-function mapParams(url) {
-    return url.split('?')
-        .pop()
-        .split('&')
-        .map(pair => pair.split('='))
-        .reduce(function (params, currentPair) {
-            params[currentPair[0]] = currentPair[1];
-            return params;
-        }, {});
-}
+const server = restify.createServer({
+    name: 'gosho'
+});
 
-const http = require('http'),
-    server = http.createServer(function (req, res) {
+server.use(restify.queryParser());
+server.use(restify.bodyParser());
 
-        res.json = function (object) {
-            res.setHeader('Content-Type', 'application/json');
-            res.write(JSON.stringify(object));
-            res.end();
-        }
+// server.get('/echo', function (req, res, next) {
+//     res.json(200, { hello: 'gosho', query: req.params});
 
-        if (req.url.indexOf('/contests') === 0) {
-            const queryParams = mapParams(req.url);
+//     return next();
+// });
 
-            console.log(queryParams);
+require('./routers/users-router')(server);
 
-            contests.page({
-                pageSize: +queryParams.pagesize,
-                pageNumber: +queryParams.page,
-                sort: { creationDate: 1 },
-                project: { name: true, startDate: true, endDate: true }
-            }).then(res.json);
-        }
-
-    });
-
-server.listen(1234, () => console.log('Server listening on port 1234'));
-
+server.listen(8001, () => console.log('http://localhost:8001'));
 
 // m, kjb kmb lk jg hf ikj;l.
 // pumata kazva che tova shte struva milioni. amin!

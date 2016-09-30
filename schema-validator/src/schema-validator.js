@@ -35,10 +35,8 @@ function validateNull(constraints, value, errors) {
 }
 
 function validateType(constraints, value, errors) {
-    const type = constraints.type,
+    const type = constraints.__type,
         isRequired = 'required' in constraints && constraints.required
-
-    console.log(type, isRequired);
 
     if (isRequired && typeof value !== type) {
         errors.push(new Error(`Expected value to be of type ${type} but got ${typeof value}`))
@@ -107,18 +105,26 @@ const defaultValidationFunctions = {
 }
 
 function createValidateFunction(validationFunctions) {
-    validationFunctions.complex = createValidateFunction
 
-    return function validate(schema, object) {
+
+    function validate(schema, object) {
 
         const errors = []
+
+        validateType(schema, object, errors)
+
+        if ('__type' in schema && 'required' in schema) {
+
+            if (errors.length && schema.required) {
+                return errors
+            } else if (!schema.required) {
+                return []
+            }
+        }
 
         for (const propName in schema) {
 
             if (propName === '__type') {
-                if (schema.__type !== 'complex') {
-                    validateType(schema.__type, typeof object, errors)
-                }
                 continue
             }
 
@@ -134,6 +140,10 @@ function createValidateFunction(validationFunctions) {
 
         return errors
     }
+
+    validationFunctions.object = validate
+
+    return validate
 }
 
 module.exports = {
