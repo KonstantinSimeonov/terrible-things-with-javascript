@@ -1,5 +1,9 @@
 'use strict'
 
+const formidable = require('formidable'),
+    fs = require('fs'),
+    path = require('path');
+
 module.exports = function (users, validate) {
 
     const pagingSchema = {
@@ -109,6 +113,46 @@ module.exports = function (users, validate) {
                     res.status(400).json(err);
                     next();
                 });
+        },
+        uploadJsonForm(req, res, next) {
+            res.status(200).send(`
+                <form action="/users/json-upload" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="data.json"/>
+                    <input type="submit" value="upload" />
+                </form>
+            `);
+        },
+        uploadJson(req, res, next) {
+            const form = new formidable.IncomingForm();
+            let fileName;
+            form.on('fileBegin', function(name, file){
+                fileName = file.path = path.join(__dirname, '../../uploads/' + name);
+            });
+
+            form.parse(req, function (err, fields, files) {
+                if(err) {
+                    return res.status(500).json(err);
+                }
+
+                fs.readFile(fileName, 'utf8', function (err, content) {
+                    if(err) {
+                        res.status(500).json(err);
+                    }
+
+                    console.log('read file');
+
+                    users
+                        .insert(JSON.parse(content))
+                        .then(function (data) {
+                            console.log(data, 'here!');
+                            res.status(201).json({ added: data.ops.map(u => u.username) });
+                        })
+                        .catch(function (error) {
+                            console.log(error, 'there!');
+                            res.status(500).json(error);
+                        });
+                });
+            });
         }
     }
 }
