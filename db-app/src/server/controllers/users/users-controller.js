@@ -49,7 +49,7 @@ module.exports = function (users, validate) {
             const errors = validate(pagingSchema, pagingInfo);
 
             if (errors.length) {
-                res.json(400, errors)
+                res.status(400).json(errors)
                 next();
                 return;
             }
@@ -63,11 +63,11 @@ module.exports = function (users, validate) {
                 project: req.query.project
             })
                 .then(function (data) {
-                    res.json(200, data);
+                    res.status(200).json(data);
                     next();
                 })
                 .catch(function (err) {
-                    res.send(400, err);
+                    res.status(400).json(err);
                     next();
                 });
         },
@@ -76,11 +76,11 @@ module.exports = function (users, validate) {
             users
                 .first({ _id: req.params.id })
                 .then(function (user) {
-                    res.json(200, user);
+                    res.status(200).json(user);
                     next();
                 })
                 .catch(function (err) {
-                    res.json(500, err);
+                    res.status(500).json(err);
                     next();
                 })
         },
@@ -89,11 +89,11 @@ module.exports = function (users, validate) {
             users
                 .remove({ _id: req.params.id })
                 .then(function (removedUser) {
-                    res.json(200, removedUser);
+                    res.status(200).json(removedUser);
                     next();
                 })
                 .catch(function (err) {
-                    res.json(500, err);
+                    res.status(500).json(err);
                     next();
                 })
         },
@@ -103,10 +103,10 @@ module.exports = function (users, validate) {
             users
                 .insert(req.body.users)
                 .then(function (user) {
-                    res.json(200, user);
+                    res.status(200).json(user);
                 })
                 .catch(function (err) {
-                    res.send(400, err);
+                    res.status(400).json(err);
                     next();
                 });
         }

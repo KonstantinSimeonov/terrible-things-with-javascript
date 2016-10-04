@@ -1,14 +1,13 @@
 'use strict';
 
-const restify = require('restify'),
+const express = require('express'),
+    bodyParser = require('body-parser'),
     contests = require('./data/contests');
 
-const server = restify.createServer({
-    name: 'gosho'
-});
+const server = express();
 
-server.use(restify.queryParser());
-server.use(restify.bodyParser());
+server.use(bodyParser.json());
+server.use(bodyParser.urlencoded({ extended: true }));
 
 // server.get('/echo', function (req, res, next) {
 //     res.json(200, { hello: 'gosho', query: req.params});

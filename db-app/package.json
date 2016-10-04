@@ -11,10 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
     "mongodb": "^2.2.10",
     "mysql": "^2.11.1",
     "node-xlsx": "^0.7.2",
-    "restify": "^4.1.1",
     "unzip": "^0.1.11"
   }
 }
