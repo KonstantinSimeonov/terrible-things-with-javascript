@@ -1,8 +1,7 @@
 'use strict';
 
 const formidable = require('formidable'),
-    path = require('path'),
-    fs = require('fs');
+    path = require('path');
 
 function loadFormTo(request, uploadsDir) {
     const form = new formidable.IncomingForm();
