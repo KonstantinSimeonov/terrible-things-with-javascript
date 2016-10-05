@@ -2,7 +2,8 @@
 
 const formidable = require('formidable'),
     fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    upload = require('../../services/file-upload.js');
 
 module.exports = function (users, validate) {
 
@@ -117,10 +118,46 @@ module.exports = function (users, validate) {
         uploadJsonForm(req, res, next) {
             res.status(200).send(`
                 <form action="/users/json-upload" method="POST" enctype="multipart/form-data">
-                    <input type="file" name="data.json"/>
+                    <input type="file" name="0.json"/>
+                    <input type="file" name="1.json"/>
                     <input type="submit" value="upload" />
                 </form>
             `);
+        },
+        uploadJsonService(req, res) {
+
+            upload
+                .loadFormTo(req, '../../uploads')
+                .then(function (filePaths) {
+                    console.log(131, filePaths);
+                    const fileContents = filePaths.map(function (fp) {
+                        const fileContentPromise = new Promise(function (fullfill, reject) {
+                            fs.readFile(fp, 'utf8', (err, contents) => err ? reject(err) : fullfill(contents));
+                        })
+
+                        return fileContentPromise;
+                    });
+
+                    console.log(140, fileContents);
+
+                    return Promise.all(fileContents);
+                })
+                .then(function (contents) {
+                    const jsonContents = contents.map(JSON.parse).reduce((soFar, current) => soFar.concat(current), []);
+
+                    return users.insert(jsonContents);
+                })
+                .then(function (dbResponse) {
+                    res.status(201)
+                        .json({
+                            added: dbResponse.ops.map(o => o.username)
+                        });
+                })
+                .catch(function (error) {
+                    console.log('greshka, vrat', error);
+                    res.status(500).json(error)
+                });
+                
         },
         uploadJson(req, res, next) {
             const form = new formidable.IncomingForm();
