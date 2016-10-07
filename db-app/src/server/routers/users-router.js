@@ -4,10 +4,10 @@ const usersController = require('../controllers/users');
 
 module.exports = function (server) {
     server
-        .get('/users', usersController.paged)
-        .get('/users/json-upload', usersController.uploadJsonForm)
-        .post('/users/json-upload', usersController.uploadJsonService)
-        .get('/users/:id/details', usersController.byId)
-        .post('/users', usersController.insert)
-        .delete('/users/:id/remove', usersController.remove)
+        .get('api/users', usersController.paged)
+        .get('api/users/json-upload', usersController.uploadJsonForm)
+        .post('api/users/json-upload', usersController.uploadJsonService)
+        .get('api/users/:id/details', usersController.byId)
+        .post('api/users', usersController.insert)
+        .delete('api/users/:id/remove', usersController.remove)
 }
