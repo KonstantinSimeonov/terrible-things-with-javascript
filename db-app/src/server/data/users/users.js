@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 module.exports = function (connectionPromise, collectionName, wrapInPromise) {
 
@@ -24,7 +24,6 @@ module.exports = function (connectionPromise, collectionName, wrapInPromise) {
                 .project(options.project || {})
                 .toArray();
         },
-
         function insert(collection, records) {
             return collection.insert(records);
         },
@@ -35,7 +34,6 @@ module.exports = function (connectionPromise, collectionName, wrapInPromise) {
         function updateOne(collection, options) {
             return collection.findOneAndUpdate(options.filter, options.updates);
         },
-
         function remove(collection, options) {
             return collection.updateMany(options, { $set: { deleted: true, deletedOn: new Date() } });
         }

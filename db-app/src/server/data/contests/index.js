@@ -2,7 +2,7 @@
 
 const connectionPromise = require('../connections/mongo-connection'),
     collectionName = 'contests',
-    contests = require('./contests'),
-    wrapInPromise = require('../common').wrapInPromise;
+    wrapInPromise = require('../common').wrapInPromise,
+    contests = require('./contests');
 
 module.exports = contests(connectionPromise, collectionName, wrapInPromise);
