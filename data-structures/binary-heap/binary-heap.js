@@ -59,7 +59,7 @@ class BinaryHeap {
     }
 
     get top() {
-        return this._elements[1];
+        return this._elements[1] || null;
     }
 
     push(item) {
@@ -78,7 +78,7 @@ class BinaryHeap {
     pop() {
 
         if(!this.size) {
-            throw new Error('Popping from empty heap!');
+            return null;
         }
 
         const top = this.top;
