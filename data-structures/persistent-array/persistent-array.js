@@ -46,15 +46,14 @@ const PersistentArray = (function () {
         return (index < current.index) ? at(index, current.left) : at(index, current.right);
     }
 
-    // apparently we have a creativity crisis
-    function ihavenoshittingideadhowtonamethisidioticfunction(array) {
+    function recursiveStep(array) {
         // use recursive steps to enable chaining
         return {
             update: function (index, value) {
 
                 const newArray = update(index, value, array);
 
-                return ihavenoshittingideadhowtonamethisidioticfunction(newArray);
+                return recursiveStep(newArray);
             },
             at: function (index) {
                 return at(index, array);
@@ -67,16 +66,14 @@ const PersistentArray = (function () {
         const depth = Math.ceil(Math.log2(length)),
             array = create(depth, 0, 1 << depth);
 
-        return ihavenoshittingideadhowtonamethisidioticfunction(array);
+        return recursiveStep(array);
     }
 })();
 
-// let druvo = PersistentArray(32).update(0, 0).update(1, 'uho');
+// let tree = PersistentArray(32).update(0, 0).update(1, 'uho');
 
-// let druvo2 = druvo.update(18, 'pzo');
-// druvo = druvo.update(19, {});
+// let tree2 = tree.update(18, 'pzo');
+// tree = tree.update(19, {});
 
-// Array.from({length: 31}).map((_, i) => i).forEach(i => console.log(druvo.at(i), i))
-// [0, 1, 18, 19].forEach(i => console.log(
-//     i, druvo.at(i), druvo2.at(i)
-// ))
+// Array.from({length: 31}).map((_, i) => i).forEach(i => console.log(tree.at(i), i));
+// [0, 1, 18, 19].forEach(i => console.log(//i, tree.at(i), tree2.at(i)));

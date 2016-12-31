@@ -214,23 +214,3 @@ rndSelect n xs =  do
     where
         rndList :: Int -> (Int, Int) -> IO [Int]
         rndList n range = sequence $ map (\_ -> randomRIO range) [1..n]
-
--- Problem 24: rndSelect distinct
-rndSelectUniq :: Int -> Int -> IO [Int]
-rndSelectUniq n high = do
-    indeces <- rndListUniq n $ Kur.fromList []
-    return $ map (\i -> [1..high] !! i) indeces
-    where
-        rndListUniq :: Int -> Kur.HashSet Int -> IO [Int]
-        rndListUniq 0 m = return $ Kur.toList m
-        rndListUniq n m = do
-            rgn <- randomRIO (0, high - 1)
-            let isContained = Kur.member rgn m
-            rest <- if isContained
-                        then rndListUniq n m
-                        else rndListUniq (n - 1) $ Kur.insert rgn m
-            return rest
-
--- Problem 25: rnd permutation of a list
-rndPermute :: [a] -> IO [a]
-rndPermute xs = let len = length xs in rndSelectUniq len len >>= return . map (\i -> xs !! (i - 1))
