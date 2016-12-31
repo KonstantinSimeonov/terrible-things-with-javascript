@@ -1,4 +1,6 @@
 import Data.List
+import System.Random (randomRIO)
+import qualified Data.HashSet as Kur
 
 -- Problem 1: Last element of list
 myLast :: [a] -> a
@@ -189,3 +191,46 @@ removeKth k xs
     | otherwise = remove' (take (k - 1) xs) (drop (k - 1) xs)
                         where
                             remove' xs (y:ys) = (y, xs ++ ys)
+
+-- Problem 21: Insert an element at position K
+insert' :: Int -> a -> [a] -> [a]
+insert' k x xs = (take' k xs) ++ x:(drop' (k + 1) xs)
+
+-- Problem 22: range
+range :: Int -> Int -> [Int]
+range a b
+    | (b - 1) <= a = error "Start cannot be smaller than end!"
+    | otherwise = range' a b
+        where
+            range' a b
+                | (b - 1) <= a    = [b - 1]
+                | otherwise       = a:range' (a + 1) b
+
+-- Problem 23: randomly select elements from list
+rndSelect :: Int -> [a] -> IO [a]
+rndSelect n xs =  do
+    list <- rndList n (0, length xs)
+    return $ map (\i -> xs !! i) list
+    where
+        rndList :: Int -> (Int, Int) -> IO [Int]
+        rndList n range = sequence $ map (\_ -> randomRIO range) [1..n]
+
+-- Problem 24: rndSelect distinct
+rndSelectUniq :: Int -> Int -> IO [Int]
+rndSelectUniq n high = do
+    indeces <- rndListUniq n $ Kur.fromList []
+    return $ map (\i -> [1..high] !! i) indeces
+    where
+        rndListUniq :: Int -> Kur.HashSet Int -> IO [Int]
+        rndListUniq 0 m = return $ Kur.toList m
+        rndListUniq n m = do
+            rgn <- randomRIO (0, high - 1)
+            let isContained = Kur.member rgn m
+            rest <- if isContained
+                        then rndListUniq n m
+                        else rndListUniq (n - 1) $ Kur.insert rgn m
+            return rest
+
+-- Problem 25: rnd permutation of a list
+rndPermute :: [a] -> IO [a]
+rndPermute xs = let len = length xs in rndSelectUniq len len >>= return . map (\i -> xs !! (i - 1))
