@@ -1,8 +1,9 @@
+'use strict';
+
 class RollingHash {
     constructor(mod, base, str) {
         this.mod = mod;
         this.base = base;
-        this.str = str;
 
         this.hash = 0,
         this.power = 1;
