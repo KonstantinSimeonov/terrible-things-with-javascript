@@ -28,7 +28,7 @@ function heapifyDown(position, elements, compare) {
 }
 
 function heapifyUp(position, elements, compare) {
-    const parent = position / 2 | 0;
+    const parent = position >> 1;
     if (parent && compare(elements[position], elements[parent])) {
         swap(position, parent, elements);
         heapifyUp(parent, elements, compare);
@@ -40,7 +40,7 @@ class BinaryHeap {
         return new BinaryHeap(compare);
     }
 
-    static createFromArray(elements, compare) {
+    static from(elements, compare) {
         return new BinaryHeap(compare).pushMany(...elements);
     }  
 
@@ -93,8 +93,3 @@ class BinaryHeap {
     }
 }
 
-const testHeap = BinaryHeap.createFromArray([5, 6, -5, 16, 32, 48, 17, 88, -88, 19], (x, y) => x < y);
-
-const sortedTest = Array.from({ length: testHeap.size }).map(() => testHeap.pop());
-
-console.log(sortedTest);

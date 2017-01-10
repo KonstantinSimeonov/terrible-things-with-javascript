@@ -70,6 +70,10 @@ const PersistentArray = (function () {
     }
 })();
 
+if(typeof module !== 'undefined') {
+    module.exports = PersistentArray;
+}
+
 // let tree = PersistentArray(32).update(0, 0).update(1, 'uho');
 
 // let tree2 = tree.update(18, 'pzo');
