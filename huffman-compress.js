@@ -25,11 +25,14 @@ function createHuffmanTree(table) {
 
     const nodes = [];
 
-    table.forEach((amount, charCode) => {
-        if (amount) {
-            nodes.push({ amount, charCode });
+    for (let i = 0, length = 256; i < length; i += 1) {
+        if (table[i]) {
+            nodes.push({
+                amount: table[i],
+                charCode: i
+            });
         }
-    });
+    }
 
     const heap = BinaryHeap.from(nodes, (fst, snd) => snd.amount > fst.amount);
 
@@ -75,9 +78,9 @@ function huffmanCompress(content) {
 
     // TODO: optimize
     const bytes = compressed
-                    .join('')
-                    .match(/.{8}/g) // cyki kazva tochno 8!
-                    .map(x => parseInt(x, 2));
+        .join('')
+        .match(/.{8}/g) // cyki kazva tochno 8!
+        .map(x => parseInt(x, 2));
 
     return Buffer.from([...frequencyTable, ...bytes]);
 }
@@ -87,12 +90,15 @@ function huffmanCompress(content) {
  * @returns {string}
  */
 function huffmanDecompress(buffer) {
-    const frequencyTable = [].slice.call(buffer, 0, 256),
-        sum = frequencyTable.reduce((sum, next) => sum + next, 0),
-        huffmanTreeRoot = createHuffmanTree(frequencyTable),
+    const huffmanTreeRoot = createHuffmanTree(buffer),
         output = [];
-        
-    let current = huffmanTreeRoot;
+
+    let current = huffmanTreeRoot,
+        sum = 0;
+
+    for(let i = 0; i < 256; i += 1) {
+        sum += buffer[i];
+    }
 
     for (let i = 256; i < buffer.length; i += 1) {
         for (let j = 7; j >= 0; j -= 1) {
@@ -103,7 +109,7 @@ function huffmanDecompress(buffer) {
                 output.push(String.fromCharCode(current.charCode));
                 current = huffmanTreeRoot;
 
-                if(output.length === sum) {
+                if (output.length === sum) {
                     break;
                 }
             }
