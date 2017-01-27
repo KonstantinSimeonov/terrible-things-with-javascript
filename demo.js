@@ -2,6 +2,10 @@
 
 const fs = require('fs');
 
-const compress = require('./index');
+const { compress, decompress } = require('./huffman-compress');
 
-fs.writeFileSync('testout', compress(fs.readFileSync('./test.txt', 'ascii')), { encoding: 'ascii' });
+const compressed = compress(fs.readFileSync('./test.txt', 'ascii'));
+
+const dec = decompress(compressed);
+
+console.log(dec);

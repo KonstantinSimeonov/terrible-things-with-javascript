@@ -64,17 +64,56 @@ function huffmanCompress(content) {
         replaceTable = [];
 
     dfs(huffmanTreeRoot, '', (leaf, path) => replaceTable[leaf.charCode] = path);
-    
+
     const compressed = [];
 
     for (let i = 0, length = content.length; i < length; i += 1) {
         compressed[i] = replaceTable[content[i].charCodeAt(0)];
     }
 
-    // TODO: optimize
-    const bytes = compressed.join('').match(/.{1,8}/g).map(x => parseInt(x, 2));
+    compressed.push('0000000');
 
-    return Buffer.from(bytes);
+    // TODO: optimize
+    const bytes = compressed
+                    .join('')
+                    .match(/.{8}/g) // cyki kazva tochno 8!
+                    .map(x => parseInt(x, 2));
+
+    return Buffer.from([...frequencyTable, ...bytes]);
 }
 
-module.exports = huffmanCompress;
+/**
+ * @param {Buffer} buffer
+ * @returns {string}
+ */
+function huffmanDecompress(buffer) {
+    const frequencyTable = [].slice.call(buffer, 0, 256),
+        sum = frequencyTable.reduce((sum, next) => sum + next, 0),
+        huffmanTreeRoot = createHuffmanTree(frequencyTable),
+        output = [];
+        
+    let current = huffmanTreeRoot;
+
+    for (let i = 256; i < buffer.length; i += 1) {
+        for (let j = 7; j >= 0; j -= 1) {
+            const bit = (buffer[i] >> j) & 1;
+            current = current.children[bit];
+
+            if (!current.children) {
+                output.push(String.fromCharCode(current.charCode));
+                current = huffmanTreeRoot;
+
+                if(output.length === sum) {
+                    break;
+                }
+            }
+        }
+    }
+
+    return output.join('');
+}
+
+module.exports = {
+    compress: huffmanCompress,
+    decompress: huffmanDecompress
+};

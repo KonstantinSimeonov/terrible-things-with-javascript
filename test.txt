@@ -1,1 +1,28 @@
-The technique works by creating a binary tree of nodes. These can be stored in a regular array, the size of which depends on the number of symbols, n {displaystyle n} n. A node can be either a leaf node or an internal node. Initially, all nodes are leaf nodes, which contain the symbol itself, the weight (frequency of appearance) of the symbol and optionally, a link to a parent node which makes it easy to read the code (in reverse) starting from a leaf node. Internal nodes contain symbol weight, links to two child nodes and the optional link to a parent node. As a common convention, bit '0' represents following the left child and bit '1' represents following the right child. A finished tree has up to n {displaystyle n} n leaf nodes and n − 1 {displaystyle n-1} n-1 internal nodes. A Huffman tree that omits unused symbols produces the most optimal code lengths.
+CXX=g++
+CXXFLAGS=-c -O2 -march=native -pipe -MMD -MP
+LDFLAGS=
+
+BUILD_DIR=bin
+TARGET=${BUILD_DIR}/huff
+
+SRC_FILES=$(shell find -name \*.cpp)
+O_FILES=${SRC_FILES:%.cpp=${BUILD_DIR}/%.cpp.o}
+D_FILES=${O_FILES:%.o=%d}
+
+all: ${TARGET}
+
+clean:
+	rm -rf ${BUILD_DIR}
+
+${TARGET}: ${O_FILES}
+	${CXX} ${LDFLAGS} $^ -o $@
+
+${BUILD_DIR}/%.cpp.o: %.cpp ${BUILD_DIR}
+	${CXX} ${CXXFLAGS} $< -o $@
+
+${BUILD_DIR}:
+	mkdir ${BUILD_DIR}
+
+-include ${D_FILES}
+
+.PHONY: clean, all
