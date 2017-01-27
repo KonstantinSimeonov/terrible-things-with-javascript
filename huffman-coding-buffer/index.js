@@ -1,13 +1,46 @@
 'use strict';
 
-const BinaryHeap = require('./binary-heap');
+const BinaryHeap = require('../shared/binary-heap');
+
+const TABLE_SIZE = 256,
+    BYTE_LENGTH = 8;
+
+/**
+ * @param {Array.<string>} strings
+ * @returns {Array.<number>}
+ */
+function distributeIntoBytes(strings) {
+    const bytes = [];
+
+    let current = 0,
+        currentBitCount = 0;
+
+    for (let i = 0, length = strings.length; i < length; i += 1) {
+        for (let j = 0, l2 = strings[i].length; j < l2; j += 1) {
+            if (currentBitCount >= BYTE_LENGTH) {
+                bytes.push(current);
+                current = 0;
+                currentBitCount = 0;
+            }
+
+            current = (current << 1) | strings[i][j];
+            currentBitCount += 1;
+        }
+    }
+
+    if (currentBitCount) {
+        bytes.push(current << (BYTE_LENGTH - currentBitCount));
+    }
+
+    return bytes;
+}
 
 /**
  * @param {string} content
  * @returns {Array.<number>}
  */
-function computeTable(content) {
-    const result = Array.from({ length: 256 }).fill(0);
+function computeFrequencyTable(content) {
+    const result = Array.from({ length: TABLE_SIZE }).fill(0);
 
     for (let i = 0, length = content.length; i < length; i += 1) {
         const asciiCode = content.charCodeAt(i);
@@ -21,11 +54,11 @@ function computeTable(content) {
  * @param {Array.<number>} table
  * @returns {{ amount: number, children: [] }}
  */
-function createHuffmanTree(table) {
+function getHuffmanTreeRoot(table) {
 
     const nodes = [];
 
-    for (let i = 0, length = 256; i < length; i += 1) {
+    for (let i = 0, length = TABLE_SIZE; i < length; i += 1) {
         if (table[i]) {
             nodes.push({
                 amount: table[i],
@@ -47,14 +80,19 @@ function createHuffmanTree(table) {
     return heap.top;
 }
 
-function dfs(root, path, cb) {
+/**
+ * @param {{ charCode: number, children: [] }}
+ * @param {string} path
+ * @param {function} cb
+ */
+function dfs(root, path, leafCallback) {
     if (!root.children) {
-        cb(root, path || '0');
+        leafCallback(root, path || '0');
         return;
     }
 
-    dfs(root.children[0], path + 0, cb);
-    dfs(root.children[1], path + 1, cb);
+    dfs(root.children[0], path + 0, leafCallback);
+    dfs(root.children[1], path + 1, leafCallback);
 }
 
 /**
@@ -62,8 +100,8 @@ function dfs(root, path, cb) {
  * @returns {Buffer}
  */
 function huffmanCompress(content) {
-    const frequencyTable = computeTable(content),
-        huffmanTreeRoot = createHuffmanTree(frequencyTable),
+    const frequencyTable = computeFrequencyTable(content),
+        huffmanTreeRoot = getHuffmanTreeRoot(frequencyTable),
         replaceTable = [];
 
     dfs(huffmanTreeRoot, '', (leaf, path) => replaceTable[leaf.charCode] = path);
@@ -74,13 +112,7 @@ function huffmanCompress(content) {
         compressed[i] = replaceTable[content[i].charCodeAt(0)];
     }
 
-    compressed.push('0000000');
-
-    // TODO: optimize
-    const bytes = compressed
-        .join('')
-        .match(/.{8}/g) // cyki kazva tochno 8!
-        .map(x => parseInt(x, 2));
+    const bytes = distributeIntoBytes(compressed);
 
     return Buffer.from([...frequencyTable, ...bytes]);
 }
@@ -90,18 +122,18 @@ function huffmanCompress(content) {
  * @returns {string}
  */
 function huffmanDecompress(buffer) {
-    const huffmanTreeRoot = createHuffmanTree(buffer),
+    const huffmanTreeRoot = getHuffmanTreeRoot(buffer),
         output = [];
 
     let current = huffmanTreeRoot,
         sum = 0;
 
-    for(let i = 0; i < 256; i += 1) {
+    for (let i = 0; i < TABLE_SIZE; i += 1) {
         sum += buffer[i];
     }
 
-    for (let i = 256; i < buffer.length; i += 1) {
-        for (let j = 7; j >= 0; j -= 1) {
+    for (let i = TABLE_SIZE; i < buffer.length; i += 1) {
+        for (let j = BYTE_LENGTH - 1; j >= 0; j -= 1) {
             const bit = (buffer[i] >> j) & 1;
             current = current.children[bit];
 
