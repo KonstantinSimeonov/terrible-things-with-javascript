@@ -1,0 +1,80 @@
+'use strict';
+
+const BinaryHeap = require('./binary-heap');
+
+/**
+ * @param {string} content
+ * @returns {Array.<number>}
+ */
+function computeTable(content) {
+    const result = Array.from({ length: 256 }).fill(0);
+
+    for (let i = 0, length = content.length; i < length; i += 1) {
+        const asciiCode = content.charCodeAt(i);
+        result[asciiCode] += 1;
+    }
+
+    return result;
+}
+
+/**
+ * @param {Array.<number>} table
+ * @returns {{ amount: number, children: [] }}
+ */
+function createHuffmanTree(table) {
+
+    const nodes = [];
+
+    table.forEach((amount, charCode) => {
+        if (amount) {
+            nodes.push({ amount, charCode });
+        }
+    });
+
+    const heap = BinaryHeap.from(nodes, (fst, snd) => snd.amount > fst.amount);
+
+    while (heap.size > 1) {
+        const fst = heap.pop(),
+            snd = heap.pop(),
+            combinedNode = { amount: fst.amount + snd.amount, children: [snd, fst] };
+
+        heap.push(combinedNode);
+    }
+
+    return heap.top;
+}
+
+function dfs(root, path, cb) {
+    if (!root.children) {
+        cb(root, path || '0');
+        return;
+    }
+
+    dfs(root.children[0], path + 0, cb);
+    dfs(root.children[1], path + 1, cb);
+}
+
+/**
+ * @param {string} content
+ * @returns {Buffer}
+ */
+function huffmanCompress(content) {
+    const frequencyTable = computeTable(content),
+        huffmanTreeRoot = createHuffmanTree(frequencyTable),
+        replaceTable = [];
+
+    dfs(huffmanTreeRoot, '', (leaf, path) => replaceTable[leaf.charCode] = path);
+    
+    const compressed = [];
+
+    for (let i = 0, length = content.length; i < length; i += 1) {
+        compressed[i] = replaceTable[content[i].charCodeAt(0)];
+    }
+
+    // TODO: optimize
+    const bytes = compressed.join('').match(/.{1,8}/g).map(x => parseInt(x, 2));
+
+    return Buffer.from(bytes);
+}
+
+module.exports = huffmanCompress;
