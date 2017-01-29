@@ -48,7 +48,6 @@ class BinaryHeap {
         return (first, second) => first > second;
     }
 
-
     constructor(compare) {
         this._elements = [null];
         this.compare = compare || BinaryHeap.defaultCompare;

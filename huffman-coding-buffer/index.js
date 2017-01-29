@@ -135,9 +135,6 @@ function upsread(buffer) {
 function huffmanDecompress(buffer) {
     const freqTable = upsread(buffer);
 
-    require('fs').writeFileSync('./dsfsdf.json', JSON.stringify(freqTable), { encoding: 'ascii' });
-    
-
     const huffmanTreeRoot = getHuffmanTreeRoot(freqTable),
         output = [];
 

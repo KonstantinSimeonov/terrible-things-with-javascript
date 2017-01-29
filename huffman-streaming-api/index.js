@@ -1,16 +1,16 @@
 'use strict';
 
-const fs = require('fs');
-
-const BinaryHeap = require('../shared/binary-heap');
+const fs = require('fs'),
+    Transform = require('stream').Transform,
+    BinaryHeap = require('../shared/binary-heap');
 
 const TABLE_SIZE = 256,
     BYTE_LENGTH = 8;
 
 /**
- * @param {string} chunk
- * @param {Array.<number>} freqTable
- */
+* @param {string} chunk
+* @param {Array.<number>} freqTable
+*/
 function updateTableWithChunk(chunk, freqTable) {
     for (let i = 0, chunkLength = chunk.length; i < chunkLength; i += 1) {
         freqTable[chunk[i]] += 1;
@@ -82,68 +82,88 @@ function computeReplaceTable(huffmanTreeRoot) {
 function spreadFrequencyTable(table) {
     const result = [];
 
-    for(const n of table) {
+    for (const n of table) {
         result.push(n & 255, (n >> 8) & 255, (n >> 16) & 255, (n >> 24) & 255);
     }
 
     return result;
 }
 
-function compress(path) {
-    const tableReadStream$ = fs.createReadStream(path);
-    let compressReadStream$ = fs.createReadStream(path);
-    let compressWriteStream$;
+class HuffmanCompressStream extends Transform {
+    /**
+     * @param {Array.<number>} frequencyTable
+     */
+    static from(frequencyTable, options) {
+        return new HuffmanCompressStream(frequencyTable, options);
+    }
 
-    computeFrequencyTable(tableReadStream$)
-        .then(freqTable => {
-            const huffmanRoot = getHuffmanTreeRoot(freqTable),
-                replaceTable = computeReplaceTable(huffmanRoot);
+    /**
+     * @param {Array.<number>} frequencyTable
+     */
+    constructor(frequencyTable, options) {
+        super(options);
+        
+        // bytesLeftCount is used to determine when to write the last byte
+        this.bytesLeftCount = frequencyTable.reduce((sum, next) => sum + next, 0);
 
-            let byte = 0,
-                currentByteBitsCount = 0;
+        this.huffmanRoot = getHuffmanTreeRoot(frequencyTable);
+        this.spreadTable = spreadFrequencyTable(frequencyTable);
+        this.replaceTable = computeReplaceTable(this.huffmanRoot);
 
-            compressWriteStream$ = fs.createWriteStream(path + '.min', { encoding: 'ascii' });
+        // always write the spread frequency table first
+        this.push(Buffer.from(this.spreadTable));
 
-            const spreadTable = spreadFrequencyTable(freqTable);
-            compressWriteStream$.write(Buffer.from(spreadTable), () => console.log('writing freq table'));
-            
-            compressWriteStream$.on('finish', () => console.log('write end'));
+        this.byte = 0;
+        this.currentByteBitsCount = 0;
+    }
 
-            compressReadStream$.on('data', chunk => {
-                console.log('received chunk');                                                                                                                                                                                                      
-                const compressed = [].map.call(chunk, b => replaceTable[b]);
+    /**
+     * @param {Buffer} chunk
+     * @param {?string} encoding
+     * @param {function} callback
+     */
+    _transform(chunk, encoding, callback) {
+        const compressed = [].map.call(chunk, b => this.replaceTable[b]),
+            output = [];
 
-                const output = [];
+        for (let i = 0, length = compressed.length; i < length; i += 1) {
+            for (let j = 0, l2 = compressed[i].length; j < l2; j += 1) {
+                this.byte = (this.byte << 1) | compressed[i][j];
+                this.currentByteBitsCount += 1;
 
-                for (let i = 0, length = compressed.length; i < length; i += 1) {
-                    for (let j = 0, l2 = compressed[i].length; j < l2; j += 1) {
-                        byte = (byte << 1) | compressed[i][j];
-                        currentByteBitsCount += 1;
-
-                        if (currentByteBitsCount >= 8) {
-                            output.push(byte);
-                            byte = 0;
-                            currentByteBitsCount = 0;
-                        }
-                    }
+                if (this.currentByteBitsCount >= BYTE_LENGTH) {
+                    output.push(this.byte);
+                    this.byte = 0;
+                    this.currentByteBitsCount = 0;
                 }
+            }
+        }
 
-                const chunkToWrite = Buffer.from(output);
-                compressWriteStream$.write(chunkToWrite, () => console.log('chunk written'));
-            });
+        this.bytesLeftCount -= chunk.length;
 
-            compressReadStream$.on('end', () => {
-                
-                if(byte) {
-                    byte <<= 8 - currentByteBitsCount;
-                    compressWriteStream$.write(Buffer.from([byte]), () => console.log('write last byte'));
-                }
+        if (!this.bytesLeftCount) {
+            output.push(this.byte << BYTE_LENGTH - this.currentByteBitsCount);
+        }
 
-                console.log('end');
+        const chunkToWrite = Buffer.from(output);
+        this.push(chunkToWrite, encoding);
+        callback();
+    }
+}
 
-                compressWriteStream$.end();
-            });
+function compress(path, dest) {
+    const srcTable$ = fs.createReadStream(path);
+
+    computeFrequencyTable(srcTable$)
+        .then(frequencyTable => {
+            const src$ = fs.createReadStream(path),
+                dest$ = fs.createWriteStream(dest),
+                compressor$ = HuffmanCompressStream.from(frequencyTable);
+
+            src$.pipe(compressor$).pipe(dest$);
         });
 }
 
-compress('../test.txt');
+module.exports = {
+    compress
+};
