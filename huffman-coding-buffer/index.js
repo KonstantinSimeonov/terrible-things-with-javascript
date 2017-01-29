@@ -55,7 +55,6 @@ function computeFrequencyTable(content) {
  * @returns {{ amount: number, children: [] }}
  */
 function getHuffmanTreeRoot(table) {
-
     const nodes = [];
 
     for (let i = 0, length = TABLE_SIZE; i < length; i += 1) {
@@ -104,6 +103,7 @@ function huffmanCompress(content) {
         huffmanTreeRoot = getHuffmanTreeRoot(frequencyTable),
         replaceTable = [];
 
+    
     dfs(huffmanTreeRoot, '', (leaf, path) => replaceTable[leaf.charCode] = path);
 
     const compressed = [];
@@ -117,22 +117,38 @@ function huffmanCompress(content) {
     return Buffer.from([...frequencyTable, ...bytes]);
 }
 
+function upsread(buffer) {
+    const freqTable = [];
+
+    for (let i = 0, length = 256; i < length; i += 1) {
+        const n = i * 4;
+        freqTable.push(buffer[n] | (buffer[n + 1] << 8) | (buffer[n + 2] << 16) | (buffer[n + 3] << 24));
+    }
+
+    return freqTable;
+}
+
 /**
  * @param {Buffer} buffer
  * @returns {string}
  */
 function huffmanDecompress(buffer) {
-    const huffmanTreeRoot = getHuffmanTreeRoot(buffer),
+    const freqTable = upsread(buffer);
+
+    require('fs').writeFileSync('./dsfsdf.json', JSON.stringify(freqTable), { encoding: 'ascii' });
+    
+
+    const huffmanTreeRoot = getHuffmanTreeRoot(freqTable),
         output = [];
 
     let current = huffmanTreeRoot,
         sum = 0;
 
     for (let i = 0; i < TABLE_SIZE; i += 1) {
-        sum += buffer[i];
+        sum += freqTable[i];
     }
 
-    for (let i = TABLE_SIZE; i < buffer.length; i += 1) {
+    for (let i = TABLE_SIZE * 4; i < buffer.length; i += 1) {
         for (let j = BYTE_LENGTH - 1; j >= 0; j -= 1) {
             const bit = (buffer[i] >> j) & 1;
             current = current.children[bit];

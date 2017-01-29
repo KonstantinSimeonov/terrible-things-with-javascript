@@ -1,28 +1,96 @@
-CXX=g++
-CXXFLAGS=-c -O2 -march=native -pipe -MMD -MP
-LDFLAGS=
+'use strict';
 
-BUILD_DIR=bin
-TARGET=${BUILD_DIR}/huff
+// push, pop, top, size
 
-SRC_FILES=$(shell find -name \*.cpp)
-O_FILES=${SRC_FILES:%.cpp=${BUILD_DIR}/%.cpp.o}
-D_FILES=${O_FILES:%.o=%d}
+function swap(i, j, list) {
+    const store = list[i];
+    list[i] = list[j];
+    list[j] = store;
+}
 
-all: ${TARGET}
+function heapifyDown(position, elements, compare) {
+    let left = position * 2,
+        right = position * 2 + 1,
+        largest = position;
 
-clean:
-	rm -rf ${BUILD_DIR}
+    if ((left < elements.length) && compare(elements[left], elements[largest])) {
+        largest = left;
+    }
 
-${TARGET}: ${O_FILES}
-	${CXX} ${LDFLAGS} $^ -o $@
+    if ((right < elements.length) && compare(elements[right], elements[largest])) {
+        largest = right;
+    }
 
-${BUILD_DIR}/%.cpp.o: %.cpp ${BUILD_DIR}
-	${CXX} ${CXXFLAGS} $< -o $@
+    if (largest !== position) {
+        swap(position, largest, elements);
+        heapifyDown(largest, elements, compare);
+    }
+}
 
-${BUILD_DIR}:
-	mkdir ${BUILD_DIR}
+function heapifyUp(position, elements, compare) {
+    const parent = position >> 1;
+    if (parent && compare(elements[position], elements[parent])) {
+        swap(position, parent, elements);
+        heapifyUp(parent, elements, compare);
+    }
+}
 
--include ${D_FILES}
+class BinaryHeap {
+    static create(compare) {
+        return new BinaryHeap(compare);
+    }
 
-.PHONY: clean, all
+    static from(elements, compare) {
+        return new BinaryHeap(compare).pushMany(...elements);
+    }  
+
+    static get defaultCompare() {
+        return (first, second) => first > second;
+    }
+
+
+    constructor(compare) {
+        this._elements = [null];
+        this.compare = compare || BinaryHeap.defaultCompare;
+    }
+
+    get size() {
+        return this._elements.length - 1;
+    }
+
+    get top() {
+        return this._elements[1] || null;
+    }
+
+    push(item) {
+        this._elements.push(item);
+        heapifyUp(this.size, this._elements, this.compare);
+
+        return this;
+    }
+
+    pushMany(...items) {
+        items.forEach(x => this.push(x));
+
+        return this;
+    } 
+
+    pop() {
+
+        if(!this.size) {
+            return null;
+        }
+
+        const top = this.top;
+        const last = this._elements.pop();
+
+        if (this.size > 0) {
+            this._elements[1] = last;
+            heapifyDown(1, this._elements, this.compare);
+        }
+
+        return top;
+    }
+}
+
+module.exports = BinaryHeap;

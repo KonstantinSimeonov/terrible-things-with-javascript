@@ -4,8 +4,8 @@ const fs = require('fs');
 
 const { compress, decompress } = require('./index');
 
-const compressed = compress(fs.readFileSync('./test.txt', 'ascii'));
-
+// let compressed = compress(fs.readFileSync('../test.txt', 'ascii'));
+const compressed = fs.readFileSync('../test.txt.min');
 const dec = decompress(compressed);
 
 console.log(dec);
