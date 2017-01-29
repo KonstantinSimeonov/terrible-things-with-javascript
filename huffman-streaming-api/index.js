@@ -2,10 +2,14 @@
 
 const fs = require('fs'),
     Transform = require('stream').Transform,
-    BinaryHeap = require('../shared/binary-heap');
-
-const TABLE_SIZE = 256,
-    BYTE_LENGTH = 8;
+    {
+        computeReplaceTable,
+        dfs,
+        getHuffmanTreeRoot,
+        spreadFrequencyTable,
+        unspread
+    } = require('../shared/algorithms'),
+    { TABLE_SIZE, BYTE_LENGTH } = require('../shared/constants');
 
 /**
 * @param {string} chunk
@@ -32,63 +36,6 @@ function computeFrequencyTable(readStream$) {
     });
 }
 
-/**
- * @param {Array.<number>} freqTable
- * @returns {{ amount: number, children: Object[] }}
- */
-function getHuffmanTreeRoot(freqTable) {
-
-    const nodes = [];
-
-    for (let i = 0; i < TABLE_SIZE; i += 1) {
-        if (freqTable[i]) {
-            nodes.push({
-                charCode: i,
-                amount: freqTable[i]
-            });
-        }
-    }
-
-    const heap = BinaryHeap.from(nodes, (fst, snd) => fst.amount < snd.amount);
-
-    while (heap.size !== 1) {
-        const fst = heap.pop(),
-            snd = heap.pop(),
-            parent = { amount: fst.amount + snd.amount, children: [snd, fst] };
-
-        heap.push(parent);
-    }
-
-    return heap.top;
-}
-
-function dfs(root, path, leafCallback) {
-    if (!root.children) {
-        leafCallback(root, path || '0');
-        return;
-    }
-
-    dfs(root.children[0], path + 0, leafCallback);
-    dfs(root.children[1], path + 1, leafCallback);
-}
-
-function computeReplaceTable(huffmanTreeRoot) {
-    const replaceTable = [];
-
-    dfs(huffmanTreeRoot, '', (leaf, path) => replaceTable[leaf.charCode] = path);
-    return replaceTable;
-}
-
-function spreadFrequencyTable(table) {
-    const result = [];
-
-    for (const n of table) {
-        result.push(n & 255, (n >> 8) & 255, (n >> 16) & 255, (n >> 24) & 255);
-    }
-
-    return result;
-}
-
 class HuffmanCompressStream extends Transform {
     /**
      * @param {Array.<number>} frequencyTable
@@ -102,7 +49,7 @@ class HuffmanCompressStream extends Transform {
      */
     constructor(frequencyTable, options) {
         super(options);
-        
+
         // bytesLeftCount is used to determine when to write the last byte
         this.bytesLeftCount = frequencyTable.reduce((sum, next) => sum + next, 0);
 
@@ -151,6 +98,10 @@ class HuffmanCompressStream extends Transform {
     }
 }
 
+/**
+ * @param {string} path
+ * @param {string} dest
+ */
 function compress(path, dest) {
     const srcTable$ = fs.createReadStream(path);
 

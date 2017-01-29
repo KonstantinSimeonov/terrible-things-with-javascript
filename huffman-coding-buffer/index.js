@@ -113,11 +113,11 @@ function huffmanCompress(content) {
     }
 
     const bytes = distributeIntoBytes(compressed);
-
+    // fix boog
     return Buffer.from([...frequencyTable, ...bytes]);
 }
 
-function upsread(buffer) {
+function unspread(buffer) {
     const freqTable = [];
 
     for (let i = 0, length = 256; i < length; i += 1) {
@@ -133,7 +133,7 @@ function upsread(buffer) {
  * @returns {string}
  */
 function huffmanDecompress(buffer) {
-    const freqTable = upsread(buffer);
+    const freqTable = unspread(buffer);
 
     const huffmanTreeRoot = getHuffmanTreeRoot(freqTable),
         output = [];
