@@ -1,9 +1,10 @@
 'use strict';
 
-    /** root precision */
-const PRECISION = 0.0001,
+/** root precision */
+const PRECISION = 0.00001,
     /** finite range in which to search for roots */
-    RANGE = 1000;
+    RANGE = 10000,
+    BINARY_SEARCH_PRECISION = 0.00000001;
 
 /**
  * Raise n to the whole power of p.
@@ -12,11 +13,11 @@ const PRECISION = 0.0001,
  * @returns {number}
  */
 function power(n, p) {
-    if(p === 0) {
+    if (p === 0) {
         return 1;
     }
 
-    if(p & 1) {
+    if (p & 1) {
         return power(n, p - 1) * n;
     }
 
@@ -53,23 +54,28 @@ function valueFor(polynomial, x) {
  * @returns {number}
  */
 function binarySearch(low, high, polynomial) {
-    let middle = low + (high - low) / 2;
 
-    const incr = valueFor(polynomial, low) < valueFor(polynomial, high);
+    const valueForLow = valueFor(polynomial, low),
+        valueForHigh = valueFor(polynomial, high),
+        increasingInRange = valueForLow < valueForHigh;
 
-    let v = valueFor(polynomial, middle);
+    if(Math.sign(valueForLow) * Math.sign(valueForHigh) > 0) {
+        return NaN;
+    }
 
-    while(low < high) {
-        if(Math.abs(v) < PRECISION) {
+    let middle = low + (high - low) / 2,
+        v = valueFor(polynomial, middle);
+
+    while (Math.abs(high - low) > BINARY_SEARCH_PRECISION) {
+        if (Math.abs(v) < PRECISION) {
             return middle;
         }
 
-        if(v > 0 && incr || (v < 0 && !incr)) {
+        if (v > 0 && increasingInRange || (v < 0 && !increasingInRange)) {
             high = middle;
-        } else if(v < 0 && incr || (v > 0 && !incr)) {
+        } else if (v < 0 && increasingInRange || (v > 0 && !increasingInRange)) {
             low = middle;
         }
-
 
         middle = low + (high - low) / 2;
         v = valueFor(polynomial, middle);
@@ -108,10 +114,10 @@ function approxRoots(polynomial) {
         ranges = [-RANGE, ...extremums, RANGE],
         roots = [];
 
-    for(let i = 0, len = ranges.length - 1; i < len; i += 1) {
+    for (let i = 0, len = ranges.length - 1; i < len; i += 1) {
         const r = binarySearch(ranges[i], ranges[i + 1], polynomial);
 
-        if(!isNaN(r)) {
+        if (!isNaN(r)) {
             roots.push(r);
         }
     }
@@ -122,7 +128,11 @@ function approxRoots(polynomial) {
 /** tests below */
 
 const Hx = [-300, -55, 18, 1],
-    Px = [-2, 0, 8];
+    Px = [-2, 0, 8],
+    Tx = [1, -1, 0, 0, 0, 1];
 
+// x^5-x+1
 console.log(approxRoots(Hx));
 console.log(approxRoots(Px));
+console.log(approxRoots(Tx));
+console.log(valueFor(Tx, -1.1673107621076189))
