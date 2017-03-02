@@ -1,4 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
+module Approx where
+
 import Data.Maybe
 
 range :: Fractional a => a

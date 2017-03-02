@@ -53,35 +53,30 @@ function valueFor(polynomial, x) {
  * @param {[number]} polynomial
  * @returns {number}
  */
-function binarySearch(low, high, polynomial) {
+function findRootInRange(low, high, fn) {
 
-    const valueForLow = valueFor(polynomial, low),
-        valueForHigh = valueFor(polynomial, high),
-        increasingInRange = valueForLow < valueForHigh;
+    const valueForLow = fn(low),
+        valueForHigh = fn(high),
+        increasing = valueForLow < valueForHigh;
 
-    if(Math.sign(valueForLow) * Math.sign(valueForHigh) > 0) {
+    if (Math.sign(valueForLow) * Math.sign(valueForHigh) > 0) {
         return NaN;
     }
 
-    let middle = low + (high - low) / 2,
-        v = valueFor(polynomial, middle);
+    while (true) {
+        const middle = (high + low) / 2,
+            middleValue = fn(middle);
 
-    while (Math.abs(high - low) > BINARY_SEARCH_PRECISION) {
-        if (Math.abs(v) < PRECISION) {
+        if (Math.abs(middleValue) < PRECISION) {
             return middle;
         }
 
-        if (v > 0 && increasingInRange || (v < 0 && !increasingInRange)) {
+        if ((middleValue > 0) === increasing) {
             high = middle;
-        } else if (v < 0 && increasingInRange || (v > 0 && !increasingInRange)) {
+        } else {
             low = middle;
         }
-
-        middle = low + (high - low) / 2;
-        v = valueFor(polynomial, middle);
     }
-
-    return NaN;
 }
 
 /**
@@ -105,17 +100,22 @@ function derivative(polynomial) {
  * @returns {[number]}
  */
 function approxRoots(polynomial) {
-    if (polynomial.length <= 2) {
+    if(polynomial.length < 2) {
+        throw new Error(`Polynomial's power is not high enough`);
+    }
+
+    if (polynomial.length === 2) {
         return [-polynomial[0] / polynomial[1]];
     }
 
     const polynomialDerivative = derivative(polynomial),
         extremums = approxRoots(polynomialDerivative),
         ranges = [-RANGE, ...extremums, RANGE],
-        roots = [];
+        roots = [],
+        fn = valueFor.bind(null, polynomial);
 
     for (let i = 0, len = ranges.length - 1; i < len; i += 1) {
-        const r = binarySearch(ranges[i], ranges[i + 1], polynomial);
+        const r = findRootInRange(ranges[i], ranges[i + 1], fn);
 
         if (!isNaN(r)) {
             roots.push(r);
@@ -125,14 +125,24 @@ function approxRoots(polynomial) {
     return roots;
 }
 
-/** tests below */
+/** demos below */
 
 const Hx = [-300, -55, 18, 1],
     Px = [-2, 0, 8],
-    Tx = [1, -1, 0, 0, 0, 1];
+    Tx = [1, -1, 0, 0, 0, 1]; // x^5-x+1
 
-// x^5-x+1
 console.log(approxRoots(Hx));
 console.log(approxRoots(Px));
 console.log(approxRoots(Tx));
-console.log(valueFor(Tx, -1.1673107621076189))
+// console.log(valueFor(Tx, -1.1673107621076189))
+
+if(typeof module !== undefined) {
+    module.exports = {
+        power,
+        stringifyPolynomial,
+        valueFor,
+        findRootInRange,
+        derivative,
+        approxRoots
+    };
+}
