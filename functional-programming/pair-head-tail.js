@@ -4,10 +4,8 @@ const pair = (h, t) => fn => fn(h, t),
       first = p => p((h, _) => h),
       second = p => p((_, t) => t);
 
-function List() {
-    let args = [].slice.call(arguments);
-
-    return args.reduceRight((memo, curr) => pair(curr, memo), null);
+function List(...items) {
+    return items.reduceRight((memo, curr) => pair(curr, memo), null);
 }
 
 function forEach(list, fn) {

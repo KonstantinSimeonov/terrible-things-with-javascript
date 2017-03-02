@@ -1,11 +1,7 @@
 'use strict';
 
-function composition() {
-    const functions = [].slice.call(arguments);
-
-    return function (arg) {
-        return functions.reduce((memo, curr) => curr(memo), arg);
-    };
+function composition(...functions) {
+    return arg => functions.reduce((partialResult, nextFn) => nextFn(partialResult), arg);
 }
 
 const add3 = x => x + 3,

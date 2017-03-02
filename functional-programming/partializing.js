@@ -5,12 +5,10 @@ function partialize(fn) {
     return function partial(...partialArgs) {
 
         if(partialArgs.length >= fn.length) {
-            return fn.apply(null, partialArgs);
+            return fn(...partialArgs);
         } 
         
-        return function (...innerArgs) {
-            return partial.apply(null, partialArgs.concat(innerArgs));
-        }
+        return (...innerArgs) => partial(...partialArgs, ...innerArgs);
     }
 }
 
