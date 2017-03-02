@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 import Data.Maybe
 
 range :: Fractional a => a
@@ -17,7 +18,7 @@ sign n
 
 power :: (Integral a, Fractional b) => b -> a -> b
 power _ 0 = 1
-power n p
+power !n !p
     | p `mod` 2 == 1 = power n (p - 1) * n
     | otherwise      = root * root
         where root = power n $ p `div` 2
@@ -27,32 +28,33 @@ derivative (_:xs) = map (\(c, i) -> c * fromIntegral i) coeffs
     where coeffs = zip xs [1..]
 
 valueFor :: Fractional a => [a] -> a -> a
-valueFor xs v = foldl (\sum (c, i) -> sum + c * power v i) 0 $ zip xs [0..]
+valueFor xs !v = foldl (\sum (c, i) -> sum + c * power v i) 0 $ zip xs [0..]
 
-binarySearch :: (Ord a, Fractional a) => a -> a -> [a] -> Maybe a
-binarySearch low high xs
+binarySearch :: (Ord a, Fractional a) => a -> a -> (a -> a) -> Maybe a
+binarySearch !low !high fn
     | sign valueForLow * sign valueForHigh > 0 = Nothing
-    | otherwise = binarySearch' low high xs
+    | otherwise = Just $ binarySearch' low high fn
         where
-            valueForLow = valueFor xs low
-            valueForHigh = valueFor xs high
+            valueForLow = fn low
+            valueForHigh = fn high
             increasing = valueForLow < valueForHigh
 
-            binarySearch' :: (Ord a, Fractional a) => a -> a -> [a] -> Maybe a
-            binarySearch' low high xs
-                | abs (high - low) < xPrecision                                                    = Nothing
-                | ((v > rootPrecision) && increasing) || ((v < -rootPrecision) && not increasing)  = binarySearch' low middle xs
-                | ((v < -rootPrecision) && increasing) || ((v > rootPrecision) && not increasing)  = binarySearch' middle high xs
-                | otherwise                                                                        = Just middle
+            binarySearch' :: (Ord a, Fractional a) => a -> a -> (a -> a) -> a
+            binarySearch' !low !high fn
+                | abs v < rootPrecision     = middle
+                | (v > 0) == increasing     = binarySearch' low middle fn
+                | otherwise                 = binarySearch' middle high fn
                     where
-                        middle = low + ((high - low) / 2)
-                        v      = valueFor xs middle
+                        middle = (high + low) / 2
+                        v      = fn middle
 
-approx :: (Ord a, Fractional a) => [a] -> [Maybe a]
-approx [b, a] = [Just (-b / a)]
-approx xs = filter (Nothing /=) $ map (\(Just low, Just high) -> binarySearch low high xs) ranges
+approx :: (Ord a, Fractional a) => [a] -> [a]
+approx [] = error "Not enough coefficients"
+approx [_] = approx []
+approx [b, a] = [-b / a]
+approx xs = mapMaybe (\(low, high) -> binarySearch low high $ valueFor xs) ranges
     where
-        extremumsInRange = [Just (-range)] ++ extremums ++ [Just range]
+        extremumsInRange = [-range] ++ extremums ++ [range]
         extremums = approx $ derivative xs
         ranges = zip extremumsInRange $ drop 1 extremumsInRange
 

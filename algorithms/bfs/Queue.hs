@@ -9,7 +9,7 @@ enq :: a -> Queue a -> Queue a
 enq x (Queue input output) = Queue (x:input) output
 
 enqMany :: [a] -> Queue a -> Queue a
-enqMany xs (Queue input output) = Queue ((reverse xs) ++ input) output
+enqMany xs (Queue input output) = Queue (reverse xs ++ input) output
 
 deq :: Queue a -> (a, Queue a)
 deq (Queue [] []) = error "Not enough elements!"

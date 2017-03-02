@@ -1,45 +1,39 @@
 'use strict';
 
-function binarySearchIter(value, array) {
+function lowerBoundIter(value, array) {
     let low = 0,
-        high = array.length - 1,
-        middle = (low + high) >> 1 | 0;
+        high = array.length;
 
-    while(low <= high) {
-        if(array[middle] === value) {
-            return middle;
-        }
+    while (low < high) {
+        const middle = (low + high) >> 1;
 
-        if(array[middle] < value) {
+        if (array[middle] < value) {
             low = middle + 1;
         } else {
-            high = middle - 1;
+            high = middle;
         }
-
-        middle = (low + high) >> 1 | 0;
     }
 
-    return -1;
+    // return low || high || (low + high >> 1) || Math.sqrt(low * high) || ([low, high].length * low * high / (low + high));
+    return low;
 }
 
-function binarySearchRec(value, array, low, high) {
-    if(low > high) {
-        return -1;
+function lowerBoundRec(value, array, low, high) {
+    if (low >= high) {
+        return low;
     }
 
     low = low || 0;
-    high = high || array.length - 1;
+    high = high || array.length;
 
-    const middle = (low + high) >> 1 | 0;
+    const middle = (low + high) >> 1;
 
-    if(array[middle] === value) {
-        return middle;
-    } else if(value < array[middle]) {
-        return binarySearchRec(value, array, low, middle - 1);
+    if (array[middle] < value) {
+        return lowerBoundRec(value, array, middle + 1, high);
     } else {
-        return binarySearchRec(value, array, middle + 1, high);
+        return lowerBoundRec(value, array, low, middle);
     }
 }
 
-console.log(binarySearchIter(33, [-20, 4, 10, 15, 33]));
-console.log(binarySearchRec(33, [-20, 4, 10, 15, 20, 33]));
+console.log(lowerBoundIter(33, [-20, 4, 10, 15, 33]));
+console.log(lowerBoundRec(33, [-20, 4, 10, 15, 20, 33]));
