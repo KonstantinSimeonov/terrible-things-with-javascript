@@ -1,9 +1,8 @@
 'use strict'
 
-require('../../acquire').makeGlobal()
+require('../../acquire')
 
-const { Readable } = require('stream')
-const http = require('http')
+const [{ Readable }, http] = module.acquire('stream', 'http')
 
 // fetch helper
 const httpGet = url => new Promise((resolve, reject) => {
@@ -32,7 +31,7 @@ const test1 = () => {
     console.log('Test if server responds with text from stream')
 
     // replace fs with a mock using acquire
-    acquire.publish('fs', {
+    module.acquire.publish('fs', {
         createReadStream: () => createTestStream('thisisteststream')
     })
 

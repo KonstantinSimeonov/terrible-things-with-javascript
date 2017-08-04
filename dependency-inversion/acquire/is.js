@@ -1,5 +1,5 @@
-const obj = Object.freeze({}),
-    str = '';
+const obj = Object.freeze({});
+const str = '';
 
 const areTypesEqual = (v1, v2) => Object.prototype.toString.call(v1) === Object.prototype.toString.call(v2)
 
