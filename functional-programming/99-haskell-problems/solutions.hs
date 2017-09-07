@@ -208,9 +208,38 @@ range a b
 
 -- Problem 23: randomly select elements from list
 rndSelect :: Int -> [a] -> IO [a]
-rndSelect n xs =  do
-    list <- rndList n (0, length xs)
-    return $ map (\i -> xs !! i) list
+rndSelect n xs = rnd_select n xs (length xs)
     where
-        rndList :: Int -> (Int, Int) -> IO [Int]
-        rndList n range = sequence $ map (\_ -> randomRIO range) [1..n]
+        rnd_select 0 _ _ = return []
+        rnd_select n (x:xs) len = do
+            chance <- randomRIO (0, len - 1)
+            if (chance < n)
+                then rnd_select (n - 1) xs (len - 1) >>= return . (x:)
+                else rnd_select n xs (len - 1)
+
+-- Problem 24: lotto
+lotto :: Int -> Int -> IO [Int]
+lotto n m = rndSelect n [1..m]
+
+-- Problem 25: fuck you randomRIO
+rndPermut :: [a] -> IO [a]
+rndPermut [] = return []
+rndPermut xs = do
+    nextIndex <- randomRIO (1, length xs)
+    let (next, rest) = removeKth nextIndex xs
+    permutedRest <- rndPermut rest
+    return (next:permutedRest)
+
+-- Problem 26: TODO
+-- Problem 27: TODO
+
+-- Problem 28:
+lsort :: [[a]] -> [[a]]
+lsort = sortBy (\l1 l2 -> sortFn (length l1) (length l2))
+    where
+        sortFn :: Int -> Int -> Ordering
+        sortFn n m
+            | n < m  = LT
+            | n == m = EQ
+            | n > m  = GT
+            

@@ -18,4 +18,4 @@ mergesort = headOrEmpty . msort . map (\x -> [x])
         msort :: Ord a => [[a]] -> [[a]]
         msort [] = []
         msort [x] = [x]
-        msort (x:x':xs) = msort ((merge x x'):xs)
+        msort (x:x':xs) = msort (merge x x' : xs)
