@@ -127,9 +127,12 @@ const insert_many = (T, ...xs) => xs.forEach(x => insert(T, x))
 
 const lookup = (T, x) => T.root[0] && lookup_node(T.root[0], x)
 
+const get_root = T => T.root[0]
+
 module.exports = {
     mk_rbtree,
     insert,
     insert_many,
+    get_root,
     lookup
 }

@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-const { mk_rbtree, insert } = require('./red-black-tree')
+const { mk_rbtree, insert, get_root } = require('./red-black-tree')
 const trace = require('./trace')
 const { assert_redblack_tree, assert_bst } = require('./assertions')
 const { tree_to_dot } = require('./dot')
@@ -27,7 +27,7 @@ const main = () => {
             trace(`red-black rules violated`)
 
         if (!is_bst || !follows_rules)
-            trace(tree.root[0])
+            trace(get_root(tree))
     }
 }
 

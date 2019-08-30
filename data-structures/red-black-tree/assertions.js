@@ -1,18 +1,20 @@
 const trace = require('./trace')
+const { get_root } = require('./red-black-tree')
 
 const assert_bst_node = N =>
     (!N[0] || (N.value > N[0].value && assert_bst_node(N[0]))) ||
     (!N[1] || (N.value < N[1].value && assert_bst_node(N[1])))
 
-const assert_bst = T => assert_bst_node(T.root[0])
+const assert_bst = T => assert_bst_node(get_root(T))
 
 const assert_redblack_tree = T => {
-    if (T.root[0].red)
+    const root = get_root(T)
+    if (root.red)
         return false
 
     const black_nodes = new Set
 
-    const nodes = [[T.root[0], +!T.root[0].red]]
+    const nodes = [[root, +!root.red]]
     while (nodes.length > 0) {
         const [{ value, red, 0: left, 1: right }, black_count] = nodes.pop()
 

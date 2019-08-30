@@ -1,3 +1,5 @@
+const { get_root } = require('./red-black-tree')
+
 const node_to_dot = (N, visited = new Set) => {
     // don't crash on messed up trees
     if (visited.has(N)) {
@@ -19,7 +21,7 @@ const node_to_dot = (N, visited = new Set) => {
 }
 
 const tree_to_dot = (T, name) => `digraph ${name} {
-    ${node_to_dot(T.root[0]).join(`\n    `)}
+    ${node_to_dot(get_root(T)).join(`\n    `)}
 }`
 
 module.exports = { tree_to_dot }
