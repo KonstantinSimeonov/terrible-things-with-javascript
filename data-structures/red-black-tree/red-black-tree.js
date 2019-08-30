@@ -6,12 +6,12 @@ const mk_node = (
     red = false,
     left = null,
     right = null
-) => ({ value, red, parent, false: left, true: right })
+) => ({ value, red, parent, 0: left, 1: right })
 
 const mk_rbtree = () => ({ root: mk_node(undefined) })
 
 const insert_node = (N, x) => {
-    const dir = N.value < x
+    const dir = +(N.value < x)
     if (N[dir])
         return insert_node(N[dir], x)
     else
@@ -22,14 +22,14 @@ const lookup_node = (N, x) => {
     if (N.value === x)
         return N
 
-    const dir = N.value < x
+    const dir = +(N.value < x)
     return N[dir] && lookup_node(N[dir], x)
 }
 
-const get_dir = N => N.parent.true === N
-const is_left_child = N => N.parent.false === N
+const get_dir = N => +(N.parent[1] === N)
+const is_left_child = N => N.parent[0] === N
 const is_inner_child = N => is_left_child(N) !== is_left_child(N.parent)
-const sibling = N => N.parent[!get_dir(N)]
+const sibling = N => N.parent[+!get_dir(N)]
 
 const rotate_outer = N => {
     trace(`outer rotate for ${N.value}`)
@@ -41,9 +41,9 @@ const rotate_outer = N => {
     const P_dir = get_dir(P)
     const G_dir = get_dir(G)
 
-    G[P_dir] = P[!N_dir]
+    G[P_dir] = P[+!N_dir]
     G.parent = P
-    P[!N_dir] = G
+    P[+!N_dir] = G
 
 
     R[G_dir] = P
@@ -71,8 +71,8 @@ const rotate_inner = N => {
     N[N_dir] = G
     G.parent = N
 
-    P[N_dir] = N[!N_dir]
-    N[!N_dir] = P
+    P[N_dir] = N[+!N_dir]
+    N[+!N_dir] = P
     P.parent = N
 
     N.red = false
@@ -109,20 +109,20 @@ const keep_invariant = N => {
 }
 
 const insert = (T, x) => {
-    if (!T.root.false) {
-        return T.root.false = mk_node(x, T.root, false)
+    if (!T.root[0]) {
+        return T.root[0] = mk_node(x, T.root, false)
     }
 
-    const N = insert_node(T.root.false, x)
+    const N = insert_node(T.root[0], x)
     keep_invariant(N)
-    T.root.false.red = false
+    T.root[0].red = false
 
     return N
 }
 
 const insert_many = (T, ...xs) => xs.forEach(x => insert(T, x))
 
-const lookup = (T, x) => T.root.left && lookup_node(T.root.left, x)
+const lookup = (T, x) => T.root[0] && lookup_node(T.root[0], x)
 
 module.exports = {
     mk_rbtree,

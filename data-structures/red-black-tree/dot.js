@@ -6,7 +6,7 @@ const node_to_dot = (N, visited = new Set) => {
 
     visited.add(N)
 
-    const children = [N.false, N.true].filter(Boolean)
+    const children = [N[0], N[1]].filter(Boolean)
     const color_opts = `"${N.value}"[color=${N.red ? `red` : `black`}]`
     const N_dot_edges = children.map(c => `"${N.value}" -> "${c.value}"`)
     const children_dot_edges = [].concat(...children.map(x => node_to_dot(x, visited)))
@@ -19,7 +19,7 @@ const node_to_dot = (N, visited = new Set) => {
 }
 
 const tree_to_dot = (T, name) => `digraph ${name} {
-    ${node_to_dot(T.root.false).join(`\n    `)}
+    ${node_to_dot(T.root[0]).join(`\n    `)}
 }`
 
 module.exports = { tree_to_dot }

@@ -2,7 +2,7 @@ const fs = require('fs')
 
 const { mk_rbtree, insert } = require('./red-black-tree')
 const trace = require('./trace')
-const { assert_redblack_tree, assert_bst_node } = require('./assertions')
+const { assert_redblack_tree, assert_bst } = require('./assertions')
 const { tree_to_dot } = require('./dot')
 
 const main = () => {
@@ -19,7 +19,7 @@ const main = () => {
             `utf-8`
         )
 
-        const is_bst = assert_bst_node(tree.root.false)
+        const is_bst = assert_bst(tree)
         const follows_rules = assert_redblack_tree(tree)
         if (!is_bst)
             trace(`bst rules violated`)
@@ -27,7 +27,7 @@ const main = () => {
             trace(`red-black rules violated`)
 
         if (!is_bst || !follows_rules)
-            trace(tree.root.false)
+            trace(tree.root[0])
     }
 }
 
