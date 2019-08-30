@@ -1,3 +1,4 @@
 *.dot
 *.svg
 *.html
+!sample_*.svg

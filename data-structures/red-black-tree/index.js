@@ -54,8 +54,8 @@ const test_remove = (tree, xs) => {
 const main = () => {
     const tree = mk_rbtree()
     const xs = [10, 5, 15, 15, 17, 16, 6, 7, 8, 9, 9.5, 34, 42, 43, 37, 38, 36, 39, 15.5]
-    //test_insert(tree, xs)
-    test_remove(tree, xs)
+    test_insert(tree, xs)
+    //test_remove(tree, xs)
 }
 
 main()
