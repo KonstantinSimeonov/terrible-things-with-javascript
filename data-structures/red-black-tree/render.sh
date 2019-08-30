@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-rm *.dot *.svg
+rm -f *.dot *.svg
 
 node index.js
 

@@ -90,8 +90,8 @@ const maintain_invariant = N => {
     // recolor
     if (U && U.red) {
         trace(`recoloring ${N.value}`)
-        for (const n of [P, G, U])
-            n.red = !n.red
+        for (const node of [P, G, U])
+            node.red = !node.red
 
         if (G.parent)
             maintain_invariant(G)
@@ -143,10 +143,10 @@ const rem = (N, x) => {
     if (!N[0] && !N[1]) {
         set_child(N.parent, null, N_dir)
         N.parent = null
-        return true
+        return
     }
 
-    const dir = [0, 1].find(childIndex => N[childIndex])
+    const dir = N[0] ? 0 : 1
     const successor = fold(
         it_node(N[dir]),
         N[dir],
@@ -160,8 +160,8 @@ const rem = (N, x) => {
     )
 
     set_child(N.parent, successor, N_dir)
-    for (const i of [0, 1].filter(i => N[i]))
-        set_child(successor, N[i], i)
+    set_child(successor, N[0], 0)
+    set_child(successor, N[1], 1)
 }
 
 const bst_remove_node = (N, x) => {
