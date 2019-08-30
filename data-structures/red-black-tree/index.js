@@ -1,13 +1,18 @@
 const fs = require('fs')
 
-const { mk_rbtree, insert, get_root } = require('./red-black-tree')
+const {
+    bst_remove,
+    mk_rbtree,
+    insert,
+    insert_many,
+    get_root,
+    it
+} = require('./red-black-tree')
 const trace = require('./trace')
 const { assert_redblack_tree, assert_bst } = require('./assertions')
 const { tree_to_dot } = require('./dot')
 
-const main = () => {
-    const tree = mk_rbtree()
-    const xs = [10, 5, 15, 15, 17, 6, 7, 8, 9, 9.5, 34, 42, 43, 37, 38, 36, 39]
+const test_insert = (tree, xs) => {
     for (let i = 0; i < xs.length; ++i) {
         trace(`============================ ${i}`)
         insert(tree, xs[i])
@@ -28,7 +33,28 @@ const main = () => {
 
         if (!is_bst || !follows_rules)
             trace(get_root(tree))
+
+        //trace([...it(tree)])
     }
+}
+
+const test_remove = xs => {
+    trace.silent()
+    insert_many(tree, ...xs)
+    trace.silent(true)
+
+    fs.writeFileSync(`0before_remove.dot`, tree_to_dot(tree, `xs`), `utf-8`)
+    let i = 0
+    for (const x of [15]) {
+        bst_remove(tree, x)
+        fs.writeFileSync(`${++i}.dot`, tree_to_dot(tree, `xs`), `utf-8`)
+    }
+}
+
+const main = () => {
+    const tree = mk_rbtree()
+    const xs = [10, 5, 15, 15, 17, 16, 6, 7, 8, 9, 9.5, 34, 42, 43, 37, 38, 36, 39]
+    test_insert(tree, xs)
 }
 
 main()

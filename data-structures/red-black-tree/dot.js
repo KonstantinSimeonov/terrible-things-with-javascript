@@ -12,9 +12,13 @@ const node_to_dot = (N, visited = new Set) => {
     const color_opts = `"${N.value}"[color=${N.red ? `red` : `black`}]`
     const N_dot_edges = children.map(c => `"${N.value}" -> "${c.value}"`)
     const children_dot_edges = [].concat(...children.map(x => node_to_dot(x, visited)))
+    const parent_edge = [
+        N.parent.value !== undefined && `"${N.value}" -> "${N.parent.value}"[color=gray]`
+    ].filter(Boolean)
 
     return [
         color_opts,
+        ...parent_edge,
         ...N_dot_edges,
         ...children_dot_edges
     ]
