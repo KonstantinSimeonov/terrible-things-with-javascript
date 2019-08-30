@@ -38,14 +38,14 @@ const test_insert = (tree, xs) => {
     }
 }
 
-const test_remove = xs => {
+const test_remove = (tree, xs) => {
     trace.silent()
     insert_many(tree, ...xs)
     trace.silent(true)
 
     fs.writeFileSync(`0before_remove.dot`, tree_to_dot(tree, `xs`), `utf-8`)
     let i = 0
-    for (const x of [15]) {
+    for (const x of [16, 9.5, 42]) {
         bst_remove(tree, x)
         fs.writeFileSync(`${++i}.dot`, tree_to_dot(tree, `xs`), `utf-8`)
     }
@@ -53,8 +53,9 @@ const test_remove = xs => {
 
 const main = () => {
     const tree = mk_rbtree()
-    const xs = [10, 5, 15, 15, 17, 16, 6, 7, 8, 9, 9.5, 34, 42, 43, 37, 38, 36, 39]
-    test_insert(tree, xs)
+    const xs = [10, 5, 15, 15, 17, 16, 6, 7, 8, 9, 9.5, 34, 42, 43, 37, 38, 36, 39, 15.5]
+    //test_insert(tree, xs)
+    test_remove(tree, xs)
 }
 
 main()

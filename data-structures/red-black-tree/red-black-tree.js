@@ -31,7 +31,12 @@ const lookup_node = (N, x) => {
 const get_dir = N => +(N.parent[1] === N)
 const is_left_child = N => N.parent[0] === N
 const is_inner_child = N => is_left_child(N) !== is_left_child(N.parent)
-const sibling = N => N.parent[+!get_dir(N)]
+const sibling = N => N.parent[get_dir(N) ^ 1]
+
+const set_child = (P, N, dir = +(P.value < N.value)) => {
+    P[dir] = N
+    if (N) N.parent = P
+}
 
 const rotate_outer = N => {
     trace(`outer rotate for ${N.value}`)
@@ -43,18 +48,14 @@ const rotate_outer = N => {
     const P_dir = get_dir(P)
     const G_dir = get_dir(G)
 
-    G[P_dir] = P[+!N_dir]
-    if (G[P_dir]) G[P_dir].parent = G
-    G.parent = P
-    P[+!N_dir] = G
-
-
-    R[G_dir] = P
-    P.parent = R
+    set_child(G, P[N_dir ^ 1], P_dir)
+    set_child(P, G, N_dir ^ 1)
+    set_child(R, P, G_dir)
 
     P.red = false
     G.red = true
 }
+
 
 const rotate_inner = N => {
     trace(`inner rotate for ${N.value}`)
@@ -66,19 +67,11 @@ const rotate_inner = N => {
     const G_dir = get_dir(G)
     const P_dir = get_dir(P)
 
-    // replace pivot with node
-    R[G_dir] = N
-    N.parent = R
-
-    G[P_dir] = N[N_dir]
-    if (G[P_dir]) G[P_dir].parent = G
-    N[N_dir] = G
-    G.parent = N
-
-    P[N_dir] = N[+!N_dir]
-    if (P[N_dir]) P[N_dir].parent = P
-    N[+!N_dir] = P
-    P.parent = N
+    set_child(R, N, G_dir)
+    set_child(G, N[N_dir], P_dir)
+    set_child(N, G, N_dir)
+    set_child(P, N[N_dir ^ 1], N_dir)
+    set_child(N, P)
 
     N.red = false
     G.red = true
@@ -148,37 +141,36 @@ const fold = (it, x0, fn) => {
 const rem = (N, x) => {
     const N_dir = get_dir(N)
     if (!N[0] && !N[1]) {
-        N.value === 15 && trace(N)
-        N.parent[N_dir] = null
+        set_child(N.parent, null, N_dir)
         N.parent = null
         return true
     }
 
     const dir = [0, 1].find(childIndex => N[childIndex])
-    if (!N[dir])
-        return
     const successor = fold(
         it_node(N[dir]),
         N[dir],
         (succ, x) => (+(succ.value < x.value) === dir) ? succ : x
     )
 
-    trace(successor.value)
+    set_child(
+        successor.parent, 
+        [0, 1].map(i => successor[i]).find(Boolean) || null,
+        get_dir(successor)
+    )
 
-    successor.parent[get_dir(successor)] = [0, 1].map(i => successor[i]).find(Boolean) || null
-
-    N.parent[N_dir] = successor
-    successor.parent = N.parent
+    set_child(N.parent, successor, N_dir)
     for (const i of [0, 1].filter(i => N[i]))
-        successor[i] = N[i]
+        set_child(successor, N[i], i)
 }
 
 const bst_remove_node = (N, x) => {
-    if (N.value === x)
-        return rem(N, x)
+    if (N.value === x) {
+        rem(N, x)
+    }
 
     const dir = +(N.value < x)
-    return N[dir] && bst_remove_node(N[dir], x)
+    return Boolean(N[dir]) && bst_remove_node(N[dir], x)
 }
 
 const bst_remove = (T, x) => bst_remove_node(get_root(T), x)
