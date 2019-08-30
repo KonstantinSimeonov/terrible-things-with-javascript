@@ -1,13 +1,4 @@
-const util = require('util')
-const fs = require('fs')
-
-let _debug = true
-
-const _trace = (...args) => (_debug && console.log(
-    ...args.map(
-        a => util.inspect(a, { depth: Infinity })
-    )
-)) || args[0]
+const trace = require('./trace')
 
 const mk_node = (
     value,
@@ -41,7 +32,7 @@ const is_inner_child = N => is_left_child(N) !== is_left_child(N.parent)
 const sibling = N => N.parent[!get_dir(N)]
 
 const rotate_outer = N => {
-    _trace(`outer rotate for ${N.value}`)
+    trace(`outer rotate for ${N.value}`)
     const P = N.parent
     const G = P.parent
     const R = G.parent
@@ -63,7 +54,7 @@ const rotate_outer = N => {
 }
 
 const rotate_inner = N => {
-    _trace(`inner rotate for ${N.value}`)
+    trace(`inner rotate for ${N.value}`)
     const P = N.parent
     const G = P.parent
     const R = G.parent
@@ -92,7 +83,7 @@ const keep_invariant = N => {
     if (N.red !== N.parent.red) {
         return
     }
-    _trace(`invariant for ${N.value}`)
+    trace(`invariant for ${N.value}`)
 
     const P = N.parent
     const U = sibling(P)
@@ -100,7 +91,7 @@ const keep_invariant = N => {
 
     // recolor
     if (U && U.red) {
-        _trace(`recoloring ${N.value}`)
+        trace(`recoloring ${N.value}`)
         for (const n of [P, G, U])
             n.red = !n.red
 
@@ -128,99 +119,13 @@ const insert = (T, x) => {
 
     return N
 }
+
 const insert_many = (T, ...xs) => xs.forEach(x => insert(T, x))
+
 const lookup = (T, x) => T.root.left && lookup_node(T.root.left, x)
 
-const assert_bst_node = N =>
-    (!N.false || N.value > N.false.value) ||
-    (!N.true || N.value < N.true.value)
-
-const assert_redblack_tree = T => {
-    if (T.root.false.red)
-        return false
-
-    const black_nodes = new Set
-
-    const nodes = [[T.root.false, +!T.root.false.red]]
-    while (nodes.length > 0) {
-        const [{ value, red, false: left, true: right }, black_count] = nodes.pop()
-
-        const new_black_count = black_count + !red
-
-        if (!left && !right) {
-            _trace(`leaf ${value} reached. black nodes encountered: ${new_black_count}`)
-            black_nodes.add(new_black_count)
-        }
-
-        if (red && left && left.red) {
-            _trace(value, red, left)
-            return false
-        }
-
-        if (left)
-            nodes.push([left, new_black_count])
-
-        if (red && right && right.red) {
-            _trace(value, red, right)
-            return false
-        }
-
-        if (right)
-            nodes.push([right, new_black_count])
-    }
-
-    return black_nodes.size === 1
+module.exports = {
+    mk_rbtree,
+    insert,
+    lookup
 }
-
-const to_dot = (N, visited = new Set) => {
-    // don't crash on messed up trees
-    if (visited.has(N)) {
-        return []
-    }
-
-    visited.add(N)
-
-    const children = [N.false, N.true].filter(Boolean)
-    const color_opts = `"${N.value}"[color=${N.red ? `red` : `black`}]`
-    const N_dot_edges = children.map(c => `"${N.value}" -> "${c.value}"`)
-    const children_dot_edges = [].concat(...children.map(x => to_dot(x, visited)))
-
-    return [
-        color_opts,
-        ...N_dot_edges,
-        ...children_dot_edges
-    ]
-}
-
-const to_dot_tree = (T, name) => `digraph ${name} {
-    ${to_dot(T.root.false).join(`\n    `)}
-}`
-
-
-const test = () => {
-    const tree = mk_rbtree()
-    const xs = [10, 5, 15, 17, 6, 7, 8, 9, 9.5, 34, 42, 43, 37, 38, 36, 39]
-    for (let i = 0; i < xs.length; ++i) {
-        _trace(`============================ ${i}`)
-        insert(tree, xs[i])
-
-        // visualization output
-        fs.writeFileSync(
-            `tree_${i < 10 ? `0${i}` : i}.dot`,
-            to_dot_tree(tree, `"${i}"`),
-            `utf-8`
-        )
-
-        const is_bst = assert_bst_node(tree.root.false)
-        const follows_rules = assert_redblack_tree(tree)
-        if (!is_bst)
-            _trace(`bst rules violated`)
-        if (!follows_rules)
-            _trace(`red-black rules violated`)
-
-        if (!is_bst || !follows_rules)
-            _trace(tree.root.false)
-    }
-}
-
-test()

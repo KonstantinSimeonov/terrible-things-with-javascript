@@ -2,7 +2,7 @@
 
 rm *.dot *.svg
 
-node red-black-tree.js
+node index.js
 
 function render_to_html() {
     echo '
