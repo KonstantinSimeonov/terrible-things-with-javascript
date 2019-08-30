@@ -11,11 +11,13 @@ const mk_node = (
 const mk_rbtree = () => ({ root: mk_node(undefined) })
 
 const insert_node = (N, x) => {
+    if (N.value === x)
+        return
+
     const dir = +(N.value < x)
-    if (N[dir])
-        return insert_node(N[dir], x)
-    else
-        return N[dir] = mk_node(x, N, true)
+    return N[dir]
+        ? insert_node(N[dir], x)
+        : N[dir] = mk_node(x, N, true)
 }
 
 const lookup_node = (N, x) => {
@@ -79,7 +81,7 @@ const rotate_inner = N => {
     G.red = true
 }
 
-const keep_invariant = N => {
+const maintain_invariant = N => {
     if (N.red !== N.parent.red) {
         return
     }
@@ -96,7 +98,7 @@ const keep_invariant = N => {
             n.red = !n.red
 
         if (G.parent)
-            keep_invariant(G)
+            maintain_invariant(G)
 
         return
     }
@@ -109,13 +111,14 @@ const keep_invariant = N => {
 }
 
 const insert = (T, x) => {
-    if (!T.root[0]) {
+    if (!T.root[0])
         return T.root[0] = mk_node(x, T.root, false)
-    }
 
     const N = insert_node(T.root[0], x)
-    keep_invariant(N)
-    T.root[0].red = false
+    if (N) {
+        maintain_invariant(N)
+        T.root[0].red = false
+    }
 
     return N
 }
@@ -127,5 +130,6 @@ const lookup = (T, x) => T.root[0] && lookup_node(T.root[0], x)
 module.exports = {
     mk_rbtree,
     insert,
+    insert_many,
     lookup
 }

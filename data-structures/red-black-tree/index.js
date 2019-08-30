@@ -7,7 +7,7 @@ const { tree_to_dot } = require('./dot')
 
 const main = () => {
     const tree = mk_rbtree()
-    const xs = [10, 5, 15, 17, 6, 7, 8, 9, 9.5, 34, 42, 43, 37, 38, 36, 39]
+    const xs = [10, 5, 15, 15, 17, 6, 7, 8, 9, 9.5, 34, 42, 43, 37, 38, 36, 39]
     for (let i = 0; i < xs.length; ++i) {
         trace(`============================ ${i}`)
         insert(tree, xs[i])
