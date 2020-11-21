@@ -1,0 +1,15 @@
+.log {
+    background-color: black;
+    width: 300px;
+    height: 300px;
+    border: 2px solid white;
+    border-radius: 5px;
+    color: yellow;
+    font-family: monospace;
+    box-sizing: border-box;
+    font-size: 18px;
+    padding-left: 15px;
+    padding-top: 8px;
+    overflow: auto;
+    margin: 2em;
+}

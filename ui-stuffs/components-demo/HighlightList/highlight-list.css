@@ -1,0 +1,17 @@
+.hlist {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    padding: 0;
+    padding: 9px;
+    align-items: center;
+}
+
+.hlist .hlist-item {
+    margin: 5px;
+}
+
+.hlist .hlist-item.highlighted {
+    font-size: 24px;
+    color: white;
+}

@@ -1,0 +1,16 @@
+button.step {
+    background-color: black;
+    color: white;
+    font-family: cursive;
+    font-size: 17px;
+    width: 136px;
+    border: 1px solid white;
+    border-radius: 29px;
+    outline: none;
+    margin-top: 1em;
+}
+
+button.step:hover {
+    cursor: pointer;
+    background-color: #535353;
+}
